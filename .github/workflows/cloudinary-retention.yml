@@ -2,78 +2,314 @@ name: Cloudinary 3-Month Month-End Retention
 
 on:
   schedule:
+    # Runs every day at 10:15 AM Bangkok time.
+    # The script itself only deletes on the last day of the month.
     - cron: '15 3 * * *'
+
   workflow_dispatch:
+    inputs:
+      force_delete:
+        description: 'Delete the target 3-month-old month now (use only for testing)'
+        required: false
+        default: false
+        type: boolean
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   retention:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
 
-      - name: Check and delete month-end retention cohort
+    steps:
+      - name: Check Cloudinary retention
         env:
           CLOUDINARY_CLOUD_NAME: ozv3rnvu
           CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
+          FORCE_DELETE: ${{ inputs.force_delete }}
         run: |
           node <<'NODE'
-          const fs=require('fs');
-          const https=require('https');
-          const crypto=require('crypto');
-          const TZ='Asia/Bangkok';
-          const cloud=process.env.CLOUDINARY_CLOUD_NAME;
-          const key=process.env.CLOUDINARY_API_KEY;
-          const secret=process.env.CLOUDINARY_API_SECRET;
-          const ghToken=process.env.GH_TOKEN;
-          const repo=process.env.GH_REPO;
+          const https = require('https');
 
-          function parts(d=new Date()){
-            const a=new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);
-            const o={}; for(const x of a) if(x.type!=='literal') o[x.type]=x.value;
-            return {y:+o.year,m:+o.month,d:+o.day};
+          const cloud = process.env.CLOUDINARY_CLOUD_NAME;
+          const key = process.env.CLOUDINARY_API_KEY;
+          const secret = process.env.CLOUDINARY_API_SECRET;
+          const forceDelete = String(process.env.FORCE_DELETE).toLowerCase() === 'true';
+
+          if (!cloud) {
+            throw new Error('Missing CLOUDINARY_CLOUD_NAME');
           }
-          function pad(n){return String(n).padStart(2,'0')}
-          function iso(y,m,d){return `${y}-${pad(m)}-${pad(d)}`}
-          function monthStart(y,m){return iso(y,m,1)}
-          function addMonths(y,m,n){let z=new Date(Date.UTC(y,m-1+n,1));return {y:z.getUTCFullYear(),m:z.getUTCMonth()+1}}
-          function lastDay(y,m){return new Date(Date.UTC(y,m,0)).getUTCDate()}
-          function request(url,opts={}){return new Promise((resolve,reject)=>{const r=https.request(url,opts,res=>{let b='';res.on('data',c=>b+=c);res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,body:b}));});r.on('error',reject);if(opts.body)r.write(opts.body);r.end()})}
-          function auth(){return Buffer.from(`${key}:${secret}`).toString('base64')}
-          async function cloudSearch(expression){let out=[],cursor=null;do{let u=new URL(`https://api.cloudinary.com/v1_1/${cloud}/resources/search`);u.searchParams.set('expression',expression);u.searchParams.set('max_results','500');if(cursor)u.searchParams.set('next_cursor',cursor);let r=await request(u,{headers:{Authorization:`Basic ${auth()}`}});if(r.status!==200)throw new Error(`Cloudinary search ${r.status}: ${r.body.slice(0,300)}`);let j=JSON.parse(r.body);out.push(...(j.resources||[]));cursor=j.next_cursor||null;}while(cursor);return out}
-          async function cloudDelete(publicIds){if(!publicIds.length)return 0;let deleted=0;for(let i=0;i<publicIds.length;i+=100){let ids=publicIds.slice(i,i+100);let body=JSON.stringify({public_ids:ids,invalidate:true});let r=await request(`https://api.cloudinary.com/v1_1/${cloud}/resources/image/upload`,{method:'DELETE',headers:{Authorization:`Basic ${auth()}`,'Content-Type':'application/json','Content-Length':Buffer.byteLength(body)},body});if(r.status!==200)throw new Error(`Cloudinary delete ${r.status}: ${r.body.slice(0,300)}`);deleted+=ids.length;}return deleted}
-          async function githubPut(path,obj){const api=`https://api.github.com/repos/${repo}/contents/${path}`;let get=await request(api,{headers:{Authorization:`Bearer ${ghToken}`,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','User-Agent':'QPictureRecord-Retention'}});let sha=get.status===200?JSON.parse(get.body).sha:undefined;let content=Buffer.from(JSON.stringify(obj,null,2)+'\n').toString('base64');let payload={message:'Update Cloudinary retention status',content,branch:'main'};if(sha)payload.sha=sha;let r=await request(api,{method:'PUT',headers:{Authorization:`Bearer ${ghToken}`,'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28','Content-Type':'application/json'},body:JSON.stringify(payload)});if(r.status<200||r.status>=300)throw new Error(`GitHub status update ${r.status}: ${r.body.slice(0,300)}`)}
 
-          (async()=>{
-            const now=parts();
-            const isLast=now.d===lastDay(now.y,now.m);
-            const target=addMonths(now.y,now.m,-3);
-            const targetNext=addMonths(now.y,now.m,-2);
-            const targetMonth=iso(target.y,target.m,1).slice(0,7);
-            const expression=`folder:QPictureRecord AND uploaded_at>=${monthStart(target.y,target.m)} AND uploaded_at<${monthStart(targetNext.y,targetNext.m)}`;
-            const resources=await cloudSearch(expression);
-            let deleted=0;
-            if(isLast){deleted=await cloudDelete(resources.map(x=>x.public_id).filter(Boolean));}
-            let nextY, nextM, nextTarget, nextTargetNext, nextCount=0;
-            if(isLast){
-              const nm=addMonths(now.y,now.m,1);
-              nextY=nm.y; nextM=nm.m;
-              nextTarget=addMonths(nextY,nextM,-3);
-              nextTargetNext=addMonths(nextY,nextM,-2);
-              const nextExpr=`folder:QPictureRecord AND uploaded_at>=${monthStart(nextTarget.y,nextTarget.m)} AND uploaded_at<${monthStart(nextTargetNext.y,nextTargetNext.m)}`;
-              nextCount=(await cloudSearch(nextExpr)).length;
-            }else{
-              nextY=now.y; nextM=now.m; nextTarget=target; nextTargetNext=targetNext; nextCount=resources.length;
+          if (!key) {
+            throw new Error('Missing CLOUDINARY_API_KEY');
+          }
+
+          if (!secret) {
+            throw new Error('Missing CLOUDINARY_API_SECRET');
+          }
+
+          function request(url, opts = {}) {
+            return new Promise((resolve, reject) => {
+              const req = https.request(url, opts, res => {
+                let body = '';
+
+                res.on('data', chunk => {
+                  body += chunk;
+                });
+
+                res.on('end', () => {
+                  resolve({
+                    status: res.statusCode,
+                    headers: res.headers,
+                    body
+                  });
+                });
+              });
+
+              req.on('error', reject);
+
+              if (opts.body) {
+                req.write(opts.body);
+              }
+
+              req.end();
+            });
+          }
+
+          function auth() {
+            return Buffer
+              .from(`${key}:${secret}`)
+              .toString('base64');
+          }
+
+          function getBangkokDateParts() {
+            const parts = new Intl.DateTimeFormat('en-CA', {
+              timeZone: 'Asia/Bangkok',
+              year: 'numeric',
+              month: '2-digit',
+              day: '2-digit'
+            }).formatToParts(new Date());
+
+            const result = {};
+
+            for (const part of parts) {
+              if (part.type !== 'literal') {
+                result[part.type] = Number(part.value);
+              }
             }
-            const nextDate=iso(nextY,nextM,lastDay(nextY,nextM));
-            const status={status:isLast?'completed':'scheduled',updatedAt:new Date().toISOString(),nextDeletionDate:nextDate,nextDeletionMonth:iso(nextTarget.y,nextTarget.m,1).slice(0,7),nextDeleteCount:nextCount,lastDeletedMonth:isLast?targetMonth:null,lastDeletedCount:isLast?deleted:0,note:'3 calendar months retained; deletion runs automatically on the last day of each month using Thailand time.'};
-            await githubPut('data/retention-status.json',status);
-            console.log(JSON.stringify(status,null,2));
-          })().catch(e=>{console.error(e);process.exit(1)})
+
+            return result;
+          }
+
+          function daysInMonth(year, month) {
+            return new Date(Date.UTC(year, month, 0)).getUTCDate();
+          }
+
+          function shiftMonth(year, month, amount) {
+            const date = new Date(Date.UTC(year, month - 1 + amount, 1));
+
+            return {
+              year: date.getUTCFullYear(),
+              month: date.getUTCMonth() + 1
+            };
+          }
+
+          function monthStart(year, month) {
+            return `${year}-${String(month).padStart(2, '0')}-01`;
+          }
+
+          async function cloudSearch(expression) {
+            let results = [];
+            let cursor = null;
+
+            do {
+              const url = new URL(
+                `https://api.cloudinary.com/v1_1/${cloud}/resources/search`
+              );
+
+              url.searchParams.set('expression', expression);
+              url.searchParams.set('max_results', '500');
+
+              if (cursor) {
+                url.searchParams.set('next_cursor', cursor);
+              }
+
+              const response = await request(url, {
+                method: 'GET',
+                headers: {
+                  'Authorization': `Basic ${auth()}`,
+                  'User-Agent': 'QPictureRecord-Retention'
+                }
+              });
+
+              if (response.status !== 200) {
+                throw new Error(
+                  `Cloudinary search ${response.status}: ${response.body.slice(0, 500)}`
+                );
+              }
+
+              const json = JSON.parse(response.body);
+
+              results.push(...(json.resources || []));
+
+              cursor = json.next_cursor || null;
+
+            } while (cursor);
+
+            return results;
+          }
+
+          async function cloudDelete(publicIds) {
+            if (!publicIds.length) {
+              return 0;
+            }
+
+            let deleted = 0;
+
+            for (let i = 0; i < publicIds.length; i += 100) {
+              const ids = publicIds.slice(i, i + 100);
+
+              const body = JSON.stringify({
+                public_ids: ids,
+                invalidate: true
+              });
+
+              const response = await request(
+                `https://api.cloudinary.com/v1_1/${cloud}/resources/image/upload`,
+                {
+                  method: 'DELETE',
+                  headers: {
+                    'Authorization': `Basic ${auth()}`,
+                    'User-Agent': 'QPictureRecord-Retention',
+                    'Content-Type': 'application/json',
+                    'Content-Length': Buffer.byteLength(body)
+                  },
+                  body
+                }
+              );
+
+              if (response.status !== 200) {
+                throw new Error(
+                  `Cloudinary delete ${response.status}: ${response.body.slice(0, 500)}`
+                );
+              }
+
+              deleted += ids.length;
+            }
+
+            return deleted;
+          }
+
+          async function main() {
+            const today = getBangkokDateParts();
+
+            const lastDay = daysInMonth(today.year, today.month);
+
+            const isLastDay =
+              today.day === lastDay;
+
+            console.log(
+              `Bangkok date: ${today.year}-${String(today.month).padStart(2, '0')}-${String(today.day).padStart(2, '0')}`
+            );
+
+            console.log(`Last day of month: ${lastDay}`);
+            console.log(`Is month-end: ${isLastDay}`);
+            console.log(`Force delete: ${forceDelete}`);
+
+            if (!isLastDay && !forceDelete) {
+              console.log(
+                'Today is not the last day of the month. No deletion will be performed.'
+              );
+
+              return;
+            }
+
+            /*
+             * Example:
+             *
+             * August 31
+             *       ↓
+             * Delete images uploaded during May
+             *
+             * This keeps June + July + August = 3 calendar months.
+             */
+
+            const target = shiftMonth(
+              today.year,
+              today.month,
+              -3
+            );
+
+            const nextMonth = shiftMonth(
+              target.year,
+              target.month,
+              1
+            );
+
+            const start = monthStart(
+              target.year,
+              target.month
+            );
+
+            const end = monthStart(
+              nextMonth.year,
+              nextMonth.month
+            );
+
+            console.log(
+              `Target month for deletion: ${target.year}-${String(target.month).padStart(2, '0')}`
+            );
+
+            console.log(`Search range: ${start} to ${end}`);
+
+            /*
+             * IMPORTANT:
+             * This searches images inside the Cloudinary folder
+             * QPictureRecord.
+             */
+
+            const expression =
+              `folder:QPictureRecord ` +
+              `AND uploaded_at>=${start} ` +
+              `AND uploaded_at<${end}`;
+
+            console.log(`Cloudinary expression: ${expression}`);
+
+            const resources =
+              await cloudSearch(expression);
+
+            console.log(
+              `Found ${resources.length} image(s) in the target month.`
+            );
+
+            if (!resources.length) {
+              console.log(
+                'No images found. Nothing to delete.'
+              );
+
+              return;
+            }
+
+            const publicIds =
+              resources
+                .map(resource => resource.public_id)
+                .filter(Boolean);
+
+            console.log(
+              `Images ready for deletion: ${publicIds.length}`
+            );
+
+            const deleted =
+              await cloudDelete(publicIds);
+
+            console.log(
+              `Successfully deleted ${deleted} image(s) from Cloudinary.`
+            );
+          }
+
+          main().catch(error => {
+            console.error(error);
+            process.exit(1);
+          });
           NODE
