@@ -1,7 +1,7 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>QC Photo Record V7</title><style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Thai",sans-serif;background:#f4f7fb;color:#172033}header{background:#2563eb;color:#fff;padding:16px;position:sticky;top:0;z-index:5}header h1{margin:0;font-size:22px}header p{margin:4px 0 0;font-size:12px}nav{display:flex;background:#fff;position:sticky;top:67px;z-index:4;border-bottom:1px solid #ddd}nav button{flex:1;padding:13px;border:0;background:#fff;font-weight:bold;color:#667085}nav button.active{color:#2563eb;border-bottom:3px solid #2563eb}main{max-width:1100px;margin:auto;padding:14px}.page{display:none}.page.active{display:block}.card{background:#fff;border-radius:15px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #0001}.grid,.filters{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.full{grid-column:1/-1}label{font-weight:bold;font-size:13px;display:block;margin-bottom:6px}input,select{width:100%;padding:11px;border:1px solid #ccd5e1;border-radius:9px;font:inherit}select[multiple]{min-height:110px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn{border:0;border-radius:9px;padding:10px 13px;font-weight:bold;cursor:pointer}.primary{background:#2563eb;color:#fff}.gray{background:#e9eef5}.green{background:#dcfce7;color:#166534}.red{background:#fee2e2;color:#991b1b}.blue{background:#eef2ff;color:#1e40af}.photoBtns{display:flex;gap:8px;flex-wrap:wrap}.photoBtn{background:#eef2ff;color:#1e40af;padding:11px;border-radius:9px;font-weight:bold;cursor:pointer}.photoBtn input{display:none}.preview{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.photo{position:relative;aspect-ratio:1;border:1px solid #ddd;border-radius:9px;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover}.photo button{position:absolute;right:4px;top:4px;border:0;border-radius:50%;background:#000b;color:#fff;width:28px;height:28px}.muted{font-size:12px;color:#667085;margin-top:5px}.historyPics{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.historyPic{width:62px;height:62px;object-fit:cover;border-radius:7px;border:1px solid #dbe2ea;background:#f8fafc;cursor:pointer}.noPic{color:#98a2b3;font-size:11px}.table{overflow:auto;max-height:600px;border:1px solid #ddd;border-radius:9px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;border-bottom:1px solid #ddd;white-space:nowrap;text-align:left}th{background:#f8fafc}.modal{display:none;position:fixed;inset:0;background:#0008;z-index:20;align-items:center;justify-content:center;padding:15px}.modal.show{display:flex}.box{background:#fff;padding:20px;border-radius:14px;width:min(400px,100%)}.notice{padding:10px;background:#eff6ff;border-radius:9px;color:#1e40af;font-size:13px}.retentionWarn{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}.retentionDue{background:#fee2e2;color:#991b1b;border:1px solid #fecaca}.retentionOk{background:#dcfce7;color:#166534;border:1px solid #bbf7d0}@media(max-width:700px){.grid,.filters{grid-template-columns:1fr}.full{grid-column:auto}.preview{grid-template-columns:repeat(2,1fr)}}
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>QC Photo Record V6</title><style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Thai",sans-serif;background:#f4f7fb;color:#172033}header{background:#2563eb;color:#fff;padding:16px;position:sticky;top:0;z-index:5}header h1{margin:0;font-size:22px}header p{margin:4px 0 0;font-size:12px}nav{display:flex;background:#fff;position:sticky;top:67px;z-index:4;border-bottom:1px solid #ddd}nav button{flex:1;padding:13px;border:0;background:#fff;font-weight:bold;color:#667085}nav button.active{color:#2563eb;border-bottom:3px solid #2563eb}main{max-width:1100px;margin:auto;padding:14px}.page{display:none}.page.active{display:block}.card{background:#fff;border-radius:15px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #0001}.grid,.filters{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.full{grid-column:1/-1}label{font-weight:bold;font-size:13px;display:block;margin-bottom:6px}input,select{width:100%;padding:11px;border:1px solid #ccd5e1;border-radius:9px;font:inherit}select[multiple]{min-height:110px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn{border:0;border-radius:9px;padding:10px 13px;font-weight:bold;cursor:pointer}.primary{background:#2563eb;color:#fff}.gray{background:#e9eef5}.green{background:#dcfce7;color:#166534}.red{background:#fee2e2;color:#991b1b}.blue{background:#eef2ff;color:#1e40af}.photoBtns{display:flex;gap:8px;flex-wrap:wrap}.photoBtn{background:#eef2ff;color:#1e40af;padding:11px;border-radius:9px;font-weight:bold;cursor:pointer}.photoBtn input{display:none}.preview{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.photo{position:relative;aspect-ratio:1;border:1px solid #ddd;border-radius:9px;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover}.photo button{position:absolute;right:4px;top:4px;border:0;border-radius:50%;background:#000b;color:#fff;width:28px;height:28px}.muted{font-size:12px;color:#667085;margin-top:5px}.historyPics{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.historyPic{width:62px;height:62px;object-fit:cover;border-radius:7px;border:1px solid #dbe2ea;background:#f8fafc;cursor:pointer}.noPic{color:#98a2b3;font-size:11px}.table{overflow:auto;max-height:600px;border:1px solid #ddd;border-radius:9px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;border-bottom:1px solid #ddd;white-space:nowrap;text-align:left}th{background:#f8fafc}.modal{display:none;position:fixed;inset:0;background:#0008;z-index:20;align-items:center;justify-content:center;padding:15px}.modal.show{display:flex}.box{background:#fff;padding:20px;border-radius:14px;width:min(400px,100%)}.notice{padding:10px;background:#eff6ff;border-radius:9px;color:#1e40af;font-size:13px}@media(max-width:700px){.grid,.filters{grid-template-columns:1fr}.full{grid-column:auto}.preview{grid-template-columns:repeat(2,1fr)}}
 </style></head><body>
-<header><h1>📋 QC Photo Record V7</h1><p>Record • History • Setting</p></header><nav><button id="tRecord" class="active" onclick="page('record')">📝 Record</button><button id="tHistory" onclick="page('history')">🗂️ History</button><button id="tSetting" onclick="auth('setting')">⚙️ Setting 🔐</button></nav><main>
+<header><h1>📋 QC Photo Record V6</h1><p>Record • History • Setting</p></header><nav><button id="tRecord" class="active" onclick="page('record')">📝 Record</button><button id="tHistory" onclick="page('history')">🗂️ History</button><button id="tSetting" onclick="auth('setting')">⚙️ Setting 🔐</button></nav><main>
 <section id="record" class="page active"><div class="card"><h2>📝 Record</h2><div class="grid">
 <div><label>Code</label><input id="code" list="codeList" autocomplete="off" placeholder="กรอก Code"><datalist id="codeList"></datalist><div class="muted"></div></div>
 <div><label>Batch No.</label><input id="batch" inputmode="numeric" placeholder="กรอก Batch"></div>
@@ -10,8 +10,8 @@
 <div class="actions"><button class="btn primary" onclick="save()">💾 บันทึกข้อมูล</button><button class="btn gray" onclick="clearForm()">↩️ ล้างข้อมูล</button></div></div></section>
 <section id="history" class="page"><div class="card"><h2>🗂️ History</h2><div class="filters"><div><label>🔎 ค้นหา</label><input id="search" placeholder="Code / Batch / Inspector"></div><div><label>Inspector</label><select id="fins"></select></div><div><label>วันที่เริ่ม</label><input id="start" type="date"></div><div><label>วันที่สิ้นสุด</label><input id="end" type="date"></div></div><div class="actions"><button class="btn gray" onclick="resetF()">Reset</button><button class="btn green" onclick="exportExcel()">📥 Export All / Filter</button></div><div class="muted">ข้อมูลทั้งหมด: <b id="total">0</b> | แสดง: <b id="shown">0</b></div></div><div class="card"><div class="table"><table><thead><tr><th>#</th><th>Code</th><th>Batch</th><th>Inspector</th><th>Date/Time</th><th>Inspection pic.</th><th>ลบ</th></tr></thead><tbody id="tbody"></tbody></table></div></div></section>
 <section id="setting" class="page">
-<div class="card"><h2>☁️ GitHub + Cloudinary Sync — 0 บาท</h2>
-<div class="notice">ใช้ GitHub เป็นฐานข้อมูลกลาง ไม่ใช้ Firebase / Supabase / Google Sheets<br>ข้อมูล QC จะถูกเข้ารหัสก่อนส่งขึ้น GitHub • รูปภาพเก็บบน Cloudinary เพื่อลดขนาด GitHub</div><div class="notice" style="margin-top:10px">☁️ <b>Image Storage:</b> Cloudinary • <span id="cloudStatus">พร้อมใช้งาน</span><br><span class="muted">Cloud: ozv3rnvu • Upload preset: QPictureRecord (Unsigned)</span></div><div class="notice" style="margin-top:10px">☁️ <b>พื้นที่ Repository:</b> <span id="storageText">กำลังตรวจสอบ...</span></div><div id="retentionBox" class="notice" style="margin-top:10px">🗓️ <b>Photo Retention:</b> <span id="retentionStatus">กำลังตรวจสอบรอบลบ...</span><br><span class="muted">เก็บรูป 3 เดือน และลบอัตโนมัติเป็นชุดของเดือนที่ครบ 3 เดือนในวันสุดท้ายของเดือน</span></div>
+<div class="card"><h2>☁️ GitHub Sync — 0 บาท</h2>
+<div class="notice">ใช้ GitHub เป็นฐานข้อมูลกลาง ไม่ใช้ Firebase / Supabase / Google Sheets<br>ข้อมูล QC และรูปจะถูกเข้ารหัสก่อนส่งขึ้น GitHub</div><div class="notice" style="margin-top:10px">☁️ <b>พื้นที่ Repository:</b> <span id="storageText">กำลังตรวจสอบ...</span></div>
 <div class="grid" style="margin-top:12px">
 <div><label>GitHub Owner</label><input id="ghOwner" value="patcharapornwintachai-cmd"></div>
 <div><label>Repository</label><input id="ghRepo" value="Q-PictureRecord"></div>
@@ -20,8 +20,8 @@
 <div class="full"><label>GitHub Token (เก็บเฉพาะเครื่องนี้)</label><input id="ghToken" type="password" placeholder="github_pat_..."></div>
 <div class="full"><label>Sync Key (ต้องเหมือนกันทุกเครื่อง)</label><input id="ghKey" type="password" placeholder="ตั้งรหัสลับสำหรับเข้ารหัสข้อมูล"></div>
 </div>
-<div class="actions"><button class="btn blue" onclick="saveGHConfig()">💾 บันทึกการเชื่อมต่อ</button><button class="btn green" onclick="syncNow()">☁️ Sync Now</button><button class="btn blue" onclick="testCloudinary()">🧪 Test Cloudinary</button><button class="btn blue" onclick="pullNow()">📥 โหลดจาก GitHub</button><button class="btn gray" onclick="clearGHToken()">ล้าง Token เครื่องนี้</button></div>
-<p class="muted">สถานะ: <b id="ghStatus">ยังไม่ได้เชื่อมต่อ</b></p>
+<div class="actions"><button class="btn blue" onclick="saveGHConfig()">💾 บันทึกการเชื่อมต่อ</button><button class="btn green" onclick="syncNow()">☁️ Sync Now</button><button class="btn blue" onclick="pullNow()">📥 โหลดจาก GitHub</button><button class="btn gray" onclick="clearGHToken()">ล้าง Token เครื่องนี้</button></div>
+<p class="muted">สถานะ: <b id="ghStatus">ยังไม่ได้เชื่อมต่อ</b></p><p class="muted">☁️ พื้นที่ Repository: <b id="storageText">กำลังตรวจสอบ...</b></p>
 <div class="notice" style="margin-top:10px">⚠️ อย่าใส่ Token ลงในโค้ดหรือส่งให้ผู้อื่น • Token ถูกเก็บเฉพาะ Browser เครื่องนี้</div>
 </div>
 <div class="card"><h2>⚙️ Setting</h2><div class="notice">เฉพาะเจ้าหน้าที่</div><label style="margin-top:12px">ตั้งรหัสใหม่</label><input id="newpw" type="password" inputmode="numeric"><div class="actions"><button class="btn primary" onclick="setPw()">💾 บันทึกรหัส</button></div></div>
@@ -38,12 +38,12 @@ async function init(){await dbOpen();recs=await all(R);ins=await setting('inspec
 function page(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));$(p).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));$('t'+p[0].toUpperCase()+p.slice(1)).classList.add('active');if(p==='history')renderTable();if(p==='setting')checkStorage()}
 function auth(a,id=null){action=a;pending=id;$('pw').value='';$('modal').classList.add('show');$('pw').focus()}function closeM(){$('modal').classList.remove('show');action='';pending=null}
 $('pw').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();verify()}});
-async function verify(){let p=$('pw').value,real=await setting('password','1166');if(p!==real)return alert('รหัสไม่ถูกต้อง');if(action==='setting'){closeM();page('setting')}else{await remove(R,pending);recs=await all(R);let ds=await setting('deletedIds',[]);let sid=String(pending);if(!ds.map(String).includes(sid))ds.push(sid);await put(S,{key:'deletedIds',value:ds,updatedAt:Date.now()});closeM();renderHistory();renderTable();try{await pushCloud();alert('ลบข้อมูลเรียบร้อย และ Sync GitHub แล้ว\nหมายเหตุ: รูปเดิมบน Cloudinary จะไม่ถูกลบอัตโนมัติ')}catch(e){alert('ลบข้อมูลในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n'+e.message)}}}
+async function verify(){let p=$('pw').value,real=await setting('password','1166');if(p!==real)return alert('รหัสไม่ถูกต้อง');if(action==='setting'){closeM();page('setting');return}let sid=String(pending);let rec=recs.find(r=>String(r.id)===sid);if(!rec){closeM();return alert('ไม่พบข้อมูลที่ต้องการลบ')}try{await remove(R,rec.id);recs=await all(R);let ds=await setting('deletedIds',[]);if(!ds.map(String).includes(sid))ds.push(sid);await put(S,{key:'deletedIds',value:ds,updatedAt:Date.now()});closeM();renderHistory();renderTable();try{await pushCloud();alert('ลบข้อมูลเรียบร้อย และ Sync ไป GitHub แล้ว')}catch(e){alert('ลบข้อมูลในเครื่องแล้ว แต่ยัง Sync ไป GitHub ไม่สำเร็จ\n\n'+e.message)}}catch(e){alert('ลบข้อมูลไม่สำเร็จ\n\n'+e.message)}}
 $('code').oninput=e=>{let n=e.target.selectionStart;e.target.value=e.target.value.toUpperCase();e.target.setSelectionRange(n,n)};$('batch').oninput=e=>e.target.value=e.target.value.replace(/[^0-9]/g,'');
 function read(f){return new Promise((ok,no)=>{let r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(f)})}
 async function files(fs){let left=6-imgs.length;if(fs.length>left)alert('เพิ่มได้อีก '+left+' รูป');for(let f of [...fs].slice(0,left))if(f.type.startsWith('image/'))imgs.push({type:f.type,data:await read(f)});renderPhotos()}
 camera.onchange=e=>{files(e.target.files);e.target.value=''};gallery.onchange=e=>{files(e.target.files);e.target.value=''};function renderPhotos(){$('pc').textContent=imgs.length+' / 6 รูป';$('preview').innerHTML=imgs.map((p,i)=>`<div class="photo"><img src="${p.data}"><button onclick="imgs.splice(${i},1);renderPhotos()">×</button></div>`).join('')}
-async function save(){let c=$('code').value.trim().toUpperCase(),b=$('batch').value.trim(),i=$('inspector').value;if(!c||!b||!i)return alert('⚠️ กรุณากรอกข้อมูลให้ครบก่อนบันทึก');if(!imgs.length)return alert('⚠️ กรุณาเพิ่มรูปอย่างน้อย 1 รูป');let r={id:crypto.randomUUID(),code:c,batch:b,inspector:i,inspectionDateTime:new Date().toISOString(),photos:[...imgs],updatedAt:Date.now()};await put(R,r);recs=await all(R);renderHistory();renderTable();try{ghStatus('กำลังอัปโหลดรูปไป Cloudinary...');await uploadRecordImages(r);await put(R,r);recs=await all(R);renderHistory();renderTable();await pushCloud();alert('✅ บันทึกข้อมูลเรียบร้อย\nรูปเก็บบน Cloudinary • ข้อมูล Sync ขึ้น GitHub แล้ว');clearForm();}catch(e){console.error(e);ghStatus('บันทึกในเครื่องแล้ว • รอ Sync');alert('⚠️ บันทึกในเครื่องแล้ว แต่ Sync Cloudinary/GitHub ไม่สำเร็จ\n'+e.message+'\n\nลองกด Sync Now อีกครั้งได้')}renderHistory();renderTable()}
+async function save(){let c=$('code').value.trim().toUpperCase(),b=$('batch').value.trim(),i=$('inspector').value;if(!c||!b||!i)return alert('⚠️ กรุณากรอกข้อมูลให้ครบก่อนบันทึก');let r={id:crypto.randomUUID(),code:c,batch:b,inspector:i,inspectionDateTime:new Date().toISOString(),photos:[...imgs],updatedAt:Date.now()};await put(R,r);recs=await all(R);try{await pushCloud();alert('✅ บันทึกข้อมูลเรียบร้อย และ Sync ขึ้น GitHub แล้ว');clearForm();}catch(e){alert('⚠️ บันทึกในเครื่องแล้ว แต่ Sync ขึ้น GitHub ไม่สำเร็จ\n'+e.message)}renderHistory();renderTable()}
 function clearForm(){$('code').value='';$('batch').value='';imgs=[];renderPhotos()}
 function renderIns(){let cur=$('inspector').value;$('inspector').innerHTML='<option value="">-- เลือก Inspector --</option>'+ins.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');$('inspector').value=ins.includes(cur)?cur:'';$('fins').innerHTML='<option value="">ทั้งหมด</option>'+ins.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('')}
 function renderSetting(){$('ilist').innerHTML=ins.map((x,i)=>`<div class="actions" style="margin-bottom:7px"><input id="ii${i}" value="${esc(x)}" style="flex:1"><button class="btn blue" onclick="renameI(${i})">✏️</button><button class="btn red" onclick="delI(${i})">🗑️</button></div>`).join('')}
@@ -51,71 +51,21 @@ async function persistIns(){await put(S,{key:'inspectors',value:ins,updatedAt:Da
 async function setPw(){let p=$('newpw').value.trim();if(!p)return alert('กรุณาใส่รหัสใหม่');let t=Date.now();await put(S,{key:'password',value:p,passwordUpdatedAt:t});$('newpw').value='';await pushCloud();alert('บันทึกรหัสแล้ว และ Sync แล้ว')}
 function filtered(){let q=$('search').value.trim().toLowerCase(),i=$('fins').value,s=$('start').value,e=$('end').value;return recs.filter(r=>{let d=r.inspectionDateTime.slice(0,10);return(!q||`${r.code} ${r.batch} ${r.inspector}`.toLowerCase().includes(q))&&(!i||r.inspector===i)&&(!s||d>=s)&&(!e||d<=e)})}
 function renderHistory(){let c=[...new Set(recs.map(r=>r.code))].filter(Boolean).sort();$('codeList').innerHTML=c.map(x=>`<option value="${esc(x)}">`).join('')}
-function renderTable(){let a=filtered();$('total').textContent=recs.length;$('shown').textContent=a.length;$('tbody').innerHTML=a.length?a.map((r,n)=>{let pics=(r.photos||[]).map((p,j)=>{let src=p.url||p.data||'';return src?`<img class="historyPic" src="${esc(src)}" alt="Inspection ${j+1}" title="รูปที่ ${j+1}" onclick="openImage(this.src)">`:''}).join('');return `<tr><td>${n+1}</td><td>${esc(r.code)}</td><td>${esc(r.batch)}</td><td>${esc(r.inspector)}</td><td>${new Date(r.inspectionDateTime).toLocaleString('th-TH')}</td><td><div class="historyPics">${pics||'<span class="noPic">ไม่มีรูป</span>'}</div></td><td><button class="btn red" onclick="auth('delete',${r.id})">🗑️</button></td></tr>`}).join(''):'<tr><td colspan="7">ไม่พบข้อมูล</td></tr>'}
+function renderTable(){let a=filtered();$('total').textContent=recs.length;$('shown').textContent=a.length;$('tbody').innerHTML=a.length?a.map((r,n)=>{let pics=(r.photos||[]).map((p,j)=>`<img class="historyPic" src="${p.data}" alt="Inspection ${j+1}" title="รูปที่ ${j+1}" onclick="openImage(this.src)">`).join('');return `<tr><td>${n+1}</td><td>${esc(r.code)}</td><td>${esc(r.batch)}</td><td>${esc(r.inspector)}</td><td>${new Date(r.inspectionDateTime).toLocaleString('th-TH')}</td><td><div class="historyPics">${pics||'<span class="noPic">ไม่มีรูป</span>'}</div></td><td><button class="btn red" data-delete-id="${esc(String(r.id))}">🗑️</button></td></tr>`}).join(''):'<tr><td colspan="7">ไม่พบข้อมูล</td></tr>'}
 ['start','end'].forEach(id=>$(id).addEventListener('change',renderTable));['search','fins'].forEach(id=>$(id).addEventListener('input',renderTable));function resetF(){$('search').value='';$('fins').value='';$('start').value='';$('end').value='';renderTable()}
+document.addEventListener('click',e=>{let b=e.target.closest('[data-delete-id]');if(b){e.preventDefault();e.stopPropagation();auth('delete',String(b.dataset.deleteId));}});
 function openImage(src){$('bigImage').src=src;$('imageModal').classList.add('show')}function closeImage(e){if(e.target.id==='imageModal')$('imageModal').classList.remove('show')}
 function b64(d){let x=atob(d.split(',')[1]),a=new Uint8Array(x.length);for(let i=0;i<x.length;i++)a[i]=x.charCodeAt(i);return a}
-async function imageBufferFromPhoto(p){
-  if(p&&p.data)return b64(p.data);
-  if(p&&p.url){let r=await fetch(p.url);if(!r.ok)throw new Error('โหลดรูปจาก Cloudinary ไม่สำเร็จ');return new Uint8Array(await r.arrayBuffer())}
-  throw new Error('ไม่พบไฟล์รูป')
-}
-async function exportExcel(){let a=filtered();if(!a.length)return alert('ไม่มีข้อมูลสำหรับ Export');if(!window.ExcelJS)return alert('กรุณาเชื่อมต่ออินเทอร์เน็ตเพื่อโหลด ExcelJS');let w=new ExcelJS.Workbook(),s=w.addWorksheet('QC Records');s.columns=[{header:'No.',key:'n',width:7},{header:'Code',key:'c',width:20},{header:'Batch',key:'b',width:18},{header:'Inspector',key:'i',width:20},{header:'Inspection Date/Time',key:'d',width:24},{header:'Photo 1',width:18},{header:'Photo 2',width:18},{header:'Photo 3',width:18},{header:'Photo 4',width:18},{header:'Photo 5',width:18},{header:'Photo 6',width:18}];s.getRow(1).font={bold:true};s.views=[{state:'frozen',ySplit:1}];for(let k=0;k<a.length;k++){let r=a[k],row=s.addRow({n:k+1,c:r.code,b:r.batch,i:r.inspector,d:new Date(r.inspectionDateTime).toLocaleString('th-TH')});row.height=125;for(let j=0;j<(r.photos||[]).slice(0,6).length;j++){let p=r.photos[j];try{let ext=(p.type||'').includes('png')?'png':'jpeg',buf=await imageBufferFromPhoto(p),id=w.addImage({buffer:buf,extension:ext});s.addImage(id,{tl:{col:5+j,row:row.number-1},ext:{width:115,height:115}})}catch(e){console.warn('Export photo skipped',e)}}}let out=await w.xlsx.writeBuffer(),a1=document.createElement('a');a1.href=URL.createObjectURL(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a1.download=`QC_Photo_Record_V7_${a.length===recs.length?'ALL':'FILTERED'}.xlsx`;a1.click()}
+async function exportExcel(){let a=filtered();if(!a.length)return alert('ไม่มีข้อมูลสำหรับ Export');if(!window.ExcelJS)return alert('กรุณาเชื่อมต่ออินเทอร์เน็ตเพื่อโหลด ExcelJS');let w=new ExcelJS.Workbook(),s=w.addWorksheet('QC Records');s.columns=[{header:'No.',key:'n',width:7},{header:'Code',key:'c',width:20},{header:'Batch',key:'b',width:18},{header:'Inspector',key:'i',width:20},{header:'Inspection Date/Time',key:'d',width:24},{header:'Photo 1',width:18},{header:'Photo 2',width:18},{header:'Photo 3',width:18},{header:'Photo 4',width:18},{header:'Photo 5',width:18},{header:'Photo 6',width:18}];s.getRow(1).font={bold:true};s.views=[{state:'frozen',ySplit:1}];for(let k=0;k<a.length;k++){let r=a[k],row=s.addRow({n:k+1,c:r.code,b:r.batch,i:r.inspector,d:new Date(r.inspectionDateTime).toLocaleString('th-TH')});row.height=125;(r.photos||[]).slice(0,6).forEach((p,j)=>{let ext=(p.type||'').includes('png')?'png':'jpeg',id=w.addImage({buffer:b64(p.data),extension:ext});s.addImage(id,{tl:{col:5+j,row:row.number-1},ext:{width:115,height:115}})})}let out=await w.xlsx.writeBuffer(),a1=document.createElement('a');a1.href=URL.createObjectURL(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a1.download=`QC_Photo_Record_V6_${a.length===recs.length?'ALL':'FILTERED'}.xlsx`;a1.click()}
 
-// ===== GitHub + Cloudinary Sync V7 =====
-const CLOUD_NAME='ozv3rnvu', CLOUD_PRESET='QPictureRecord';
-const GH_STORE='QCPhotoV7_GH_CONFIG_V1';
+// ===== GitHub Sync V6: cross-device read/write =====
+const GH_STORE='QCPhotoV6_GH_CONFIG_V4';
 let gh={owner:'patcharapornwintachai-cmd',repo:'Q-PictureRecord',branch:'main',file:'data/qc-data.enc',token:'',syncKey:''};
 let ghSha=null,ghBusy=false;
 function ghStatus(t){if($('ghStatus'))$('ghStatus').textContent=t||(gh.syncKey?(gh.token?'พร้อมอ่าน/เขียน':'พร้อมอ่านจาก GitHub'):'ยังไม่ได้ตั้ง Sync Key')}
-async function checkStorage(){const owner=(gh&&gh.owner)||'patcharapornwintachai-cmd',repo=(gh&&gh.repo)||'Q-PictureRecord';try{const r=await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}?t=${Date.now()}`,{headers:{'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},cache:'no-store'});if(!r.ok)throw Error();const j=await r.json(),mb=(Number(j.size)||0)/1024,gb=mb/1024,p=Math.min(100,gb/10*100);let st=gb>=9?'🔴 ใกล้เต็มมาก':gb>=7?'🟡 เริ่มใกล้เต็ม':'🟢 ปกติ';$('storageText').textContent=`${gb.toFixed(2)} GB / 10 GB (${p.toFixed(1)}%) ${st}`}catch(e){$('storageText').textContent='ตรวจสอบไม่ได้'}}
+async function checkStorage(){const owner=(gh&&gh.owner)||'patcharapornwintachai-cmd',repo=(gh&&gh.repo)||'Q-PictureRecord';try{const r=await fetch(`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}?t=${Date.now()}`,{headers:{'Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},cache:'no-store'});if(!r.ok)throw Error();const j=await r.json(),gb=(Number(j.size)||0)/1024/1024,p=Math.min(100,gb/10*100);let st=gb>=9?'🔴 ใกล้เต็มมาก':gb>=7?'🟡 เริ่มใกล้เต็ม':'🟢 ปกติ';$('storageText').textContent=`${gb.toFixed(2)} GB / 10 GB (${p.toFixed(1)}%) ${st}`}catch(e){$('storageText').textContent='ตรวจสอบไม่ได้'}}
 function loadGH(){try{let x=localStorage.getItem(GH_STORE);if(x){let j=JSON.parse(x);if(j&&typeof j==='object')gh={...gh,...j}}}catch(e){localStorage.removeItem(GH_STORE)}if($('ghOwner')){$('ghOwner').value=gh.owner;$('ghRepo').value=gh.repo;$('ghBranch').value=gh.branch;$('ghFile').value=gh.file;$('ghToken').value=gh.token;$('ghKey').value=gh.syncKey}ghStatus()}
 function saveGHConfig(){gh.owner=$('ghOwner').value.trim()||'patcharapornwintachai-cmd';gh.repo=$('ghRepo').value.trim()||'Q-PictureRecord';gh.branch=$('ghBranch').value.trim()||'main';gh.file=$('ghFile').value.trim()||'data/qc-data.enc';gh.token=$('ghToken').value.trim();gh.syncKey=$('ghKey').value;if(!gh.syncKey)return alert('กรุณาใส่ Sync Key ให้ครบ');localStorage.setItem(GH_STORE,JSON.stringify(gh));ghStatus('บันทึกแล้ว • กำลังโหลดข้อมูล...');pullNow().then(()=>{if(gh.token)syncNow()}).catch(()=>{})}
-async function testCloudinary(){
-  try{
-    ghStatus('กำลังทดสอบ Cloudinary...');
-
-    const blob=new Blob(
-      ['QPictureRecord Cloudinary test'],
-      {type:'text/plain'}
-    );
-
-    const fd=new FormData();
-    fd.append('file',blob,'q-picture-record-test.txt');
-    fd.append('upload_preset',CLOUD_PRESET);
-    fd.append('folder','QPictureRecord');
-    fd.append('tags','QPictureRecord_TEST');
-
-    const r=await fetch(cloudinaryEndpoint(),{
-      method:'POST',
-      body:fd
-    });
-
-    const tx=await r.text();
-
-    if(!r.ok){
-      throw new Error(
-        'Cloudinary Upload ไม่สำเร็จ ('+r.status+') '+tx.slice(0,500)
-      );
-    }
-
-    ghStatus('Cloudinary เชื่อมต่อได้ ✓');
-
-    alert(
-      '✅ Cloudinary เชื่อมต่อได้แล้ว\\n\\n'+
-      'มีไฟล์ทดสอบถูกสร้างใน Cloudinary โฟลเดอร์ QPictureRecord'
-    );
-  }catch(e){
-    ghStatus('Cloudinary ทดสอบไม่ผ่าน');
-
-    alert(
-      '❌ Cloudinary ยังอัปโหลดไม่ได้\\n\\n'+
-      e.message+
-      '\\n\\nถ้าข้อความพูดถึง allowed formats ให้ตรวจ Upload Preset QPictureRecord ว่ารับ JPG/JPEG/PNG'
-    );
-  }
-}
-
 function clearGHToken(){gh.token='';localStorage.setItem(GH_STORE,JSON.stringify(gh));if($('ghToken'))$('ghToken').value='';ghStatus('ล้าง Token แล้ว • ยังดูข้อมูลจาก GitHub ได้')}
 function ghUrl(){return 'https://api.github.com/repos/'+encodeURIComponent(gh.owner)+'/'+encodeURIComponent(gh.repo)+'/contents/'+gh.file.split('/').map(encodeURIComponent).join('/')}
 function ghRawUrl(){return 'https://raw.githubusercontent.com/'+encodeURIComponent(gh.owner)+'/'+encodeURIComponent(gh.repo)+'/'+encodeURIComponent(gh.branch)+'/'+gh.file.split('/').map(encodeURIComponent).join('/')}
@@ -123,81 +73,19 @@ function ghHeaders(){return {'Accept':'application/vnd.github+json','Content-Typ
 function bytesToB64(bytes){let s='';for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(s)}
 function b64ToBytes(s){let x=atob(String(s).replace(/\s/g,'')),a=new Uint8Array(x.length);for(let i=0;i<x.length;i++)a[i]=x.charCodeAt(i);return a}
 async function deriveKey(pass,salt){let base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:120000,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
-async function encryptCloud(obj){let salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),key=await deriveKey(gh.syncKey,salt),plain=new TextEncoder().encode(JSON.stringify(obj)),cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,plain);return JSON.stringify({v:4,salt:bytesToB64(salt),iv:bytesToB64(iv),data:bytesToB64(new Uint8Array(cipher))})}
+async function encryptCloud(obj){let salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12)),key=await deriveKey(gh.syncKey,salt),plain=new TextEncoder().encode(JSON.stringify(obj)),cipher=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,plain);return JSON.stringify({v:3,salt:bytesToB64(salt),iv:bytesToB64(iv),data:bytesToB64(new Uint8Array(cipher))})}
 async function decryptCloud(text){if(!text||!text.trim())return null;let x;try{x=JSON.parse(text)}catch(e){throw new Error('ไฟล์ข้อมูลบน GitHub ไม่ใช่ JSON ที่สมบูรณ์')}if(!x||!x.data||!x.iv||!x.salt)throw new Error('ไฟล์ข้อมูลบน GitHub เสียหายหรือว่าง');let key=await deriveKey(gh.syncKey,b64ToBytes(x.salt));let plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64ToBytes(x.iv)},key,b64ToBytes(x.data));return JSON.parse(new TextDecoder().decode(plain))}
 async function ghGet(){if(!gh.token)throw new Error('ต้องใช้ Token สำหรับการเขียน GitHub');let r=await fetch(ghUrl()+'?ref='+encodeURIComponent(gh.branch)+'&t='+Date.now(),{headers:ghHeaders(),cache:'no-store'});if(r.status===404){ghSha=null;return {sha:null,data:null,empty:true}}if(!r.ok){let tx=await r.text();throw new Error('GitHub อ่านไฟล์ไม่ได้ ('+r.status+') '+tx.slice(0,180))}let j=await r.json();ghSha=j.sha;if(!j.content)return {sha:j.sha,data:null,empty:true};return {sha:j.sha,data:await decryptCloud(new TextDecoder().decode(b64ToBytes(j.content))),empty:false}}
 async function rawGet(){let r=await fetch(ghRawUrl()+'?t='+Date.now(),{cache:'no-store'});if(r.status===404)return {data:null,empty:true};if(!r.ok)throw new Error('GitHub โหลดข้อมูลไม่ได้ ('+r.status+')');return {data:await decryptCloud(await r.text()),empty:false}}
-async function ghPut(payload,sha){let text=await encryptCloud(payload),body={message:'QC Photo Record V7 sync',content:bytesToB64(new TextEncoder().encode(text)),branch:gh.branch};if(sha)body.sha=sha;let r=await fetch(ghUrl(),{method:'PUT',headers:ghHeaders(),body:JSON.stringify(body)});if(r.status===409){let latest=await ghGet();return ghPut(payload,latest.sha)}if(!r.ok){let tx=await r.text();throw new Error('GitHub บันทึกไม่ได้ ('+r.status+') '+tx.slice(0,180))}let j=await r.json();ghSha=j.content&&j.content.sha?j.content.sha:ghSha}
-function cloudinaryEndpoint(){return `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`}
-async function compressForUpload(dataUrl,type='image/jpeg'){
-  return new Promise((resolve,reject)=>{let im=new Image();im.onload=()=>{let max=1600,scale=Math.min(1,max/Math.max(im.width,im.height)),w=Math.max(1,Math.round(im.width*scale)),h=Math.max(1,Math.round(im.height*scale)),c=document.createElement('canvas');c.width=w;c.height=h;let x=c.getContext('2d');x.drawImage(im,0,0,w,h);resolve(c.toDataURL('image/jpeg',0.78))};im.onerror=reject;im.src=dataUrl})
-}
-async function uploadToCloudinary(p){
-  if(p.url)return p;
-  if(!p.data)throw new Error('ไม่พบข้อมูลรูปสำหรับอัปโหลด');
-
-  let data=p.data;
-  try{
-    data=await compressForUpload(data,p.type||'image/jpeg');
-  }catch(e){
-    throw new Error('เตรียมรูปสำหรับ Cloudinary ไม่สำเร็จ: '+(e&&e.message?e.message:e));
-  }
-
-  const fd=new FormData();
-  fd.append('file',data);
-  fd.append('upload_preset',CLOUD_PRESET);
-  fd.append('folder','QPictureRecord');
-  fd.append('tags','QPictureRecord');
-
-  const safeId=(crypto.randomUUID
-    ? crypto.randomUUID()
-    : String(Date.now())+'_'+Math.random().toString(36).slice(2));
-
-  fd.append('public_id','QC_'+safeId);
-
-  const r=await fetch(cloudinaryEndpoint(),{method:'POST',body:fd});
-  const tx=await r.text();
-
-  if(!r.ok){
-    let detail=tx.slice(0,500);
-    try{
-      const ej=JSON.parse(tx);
-      if(ej.error&&ej.error.message)detail=ej.error.message;
-    }catch(_){}
-    throw new Error('Cloudinary Upload ไม่สำเร็จ ('+r.status+') '+detail);
-  }
-
-  let j;
-  try{j=JSON.parse(tx)}
-  catch(_){throw new Error('Cloudinary ตอบกลับไม่ใช่ JSON')}
-
-  if(!j.secure_url&&!j.url){
-    throw new Error('Cloudinary อัปโหลดสำเร็จแต่ไม่พบ URL รูป');
-  }
-
-  return {
-    ...p,
-    url:j.secure_url||j.url,
-    public_id:j.public_id||'',
-    resource_type:j.resource_type||'image',
-    bytes:j.bytes||0,
-    data:undefined
-  };
-}
-async function uploadRecordImages(r){let ps=r.photos||[];for(let j=0;j<ps.length;j++){if(!ps[j].url){ghStatus(`กำลังอัปโหลดรูป ${j+1}/${ps.length} ไป Cloudinary...`);ps[j]=await uploadToCloudinary(ps[j])}}r.photos=ps;return r}
-async function migrateLocalImages(){let changed=0;for(let r of recs){if((r.photos||[]).some(p=>p.data&&!p.url)){await uploadRecordImages(r);r.updatedAt=Date.now();await put(R,r);changed++}}if(changed)recs=await all(R);return changed}
-async function localPayload(){let compact=recs.map(r=>({...r,photos:(r.photos||[]).map(p=>{let q={...p};delete q.data;return q})}));return {version:7,updatedAt:Date.now(),records:compact,inspectors:await setting('inspectors',['Inspector 1']),password:await setting('password','1166'),passwordUpdatedAt:Number(await setting('passwordUpdatedAt',0)),deletedIds:await setting('deletedIds',[])} }
+async function ghPut(payload,sha){let text=await encryptCloud(payload),body={message:'QC Photo Record V6 sync',content:bytesToB64(new TextEncoder().encode(text)),branch:gh.branch};if(sha)body.sha=sha;let r=await fetch(ghUrl(),{method:'PUT',headers:ghHeaders(),body:JSON.stringify(body)});if(r.status===409){let latest=await ghGet();return ghPut(payload,latest.sha)}if(!r.ok){let tx=await r.text();throw new Error('GitHub บันทึกไม่ได้ ('+r.status+') '+tx.slice(0,180))}let j=await r.json();ghSha=j.content&&j.content.sha?j.content.sha:ghSha}
+async function localPayload(){return {version:6,updatedAt:Date.now(),records:recs,inspectors:await setting('inspectors',['Inspector 1']),password:await setting('password','1166'),passwordUpdatedAt:Number(await setting('passwordUpdatedAt',0)),deletedIds:await setting('deletedIds',[])}}
 async function clearStoreSafe(store){return new Promise((ok,no)=>{let r=db.transaction(store,'readwrite').objectStore(store).clear();r.onsuccess=()=>ok();r.onerror=()=>no(r.error)})}
 async function mergeRemote(remote){if(!remote||typeof remote!=='object')return;let dels=[...new Set([...(await setting('deletedIds',[])),...(remote.deletedIds||[])].map(String))];let map=new Map(recs.map(r=>[String(r.id),r]));for(let rr of (remote.records||[])){let id=String(rr.id);if(!map.has(id)||Number(rr.updatedAt||0)>Number(map.get(id).updatedAt||0))map.set(id,rr)}for(let id of dels)map.delete(id);recs=[...map.values()];await clearStoreSafe(R);for(let r of recs)await put(R,r);await put(S,{key:'deletedIds',value:dels,updatedAt:Date.now()});let localIns=await setting('inspectors',['Inspector 1']);ins=[...new Set([...(remote.inspectors||[]),...(localIns||[])])].filter(Boolean);if(!ins.length)ins=['Inspector 1'];await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});let lpa=Number(await setting('passwordUpdatedAt',0)),rpa=Number(remote.passwordUpdatedAt||0);if(rpa>lpa)await put(S,{key:'password',value:remote.password,passwordUpdatedAt:rpa});renderIns();renderHistory();renderTable();renderSetting()}
 async function pullNow(){if(ghBusy||!gh.syncKey)return;if(!navigator.onLine){ghStatus('ออฟไลน์');return}ghBusy=true;try{ghStatus('กำลังโหลดจาก GitHub...');let remote=await rawGet();if(remote.data){await mergeRemote(remote.data);ghStatus('โหลดจาก GitHub สำเร็จ • '+new Date().toLocaleTimeString('th-TH'))}else ghStatus('ยังไม่มีข้อมูลบน GitHub')}catch(e){console.error(e);ghStatus('โหลดไม่สำเร็จ');throw e}finally{ghBusy=false}}
-async function syncNow(){if(ghBusy)return;if(!gh.token||!gh.syncKey){ghStatus('กรุณาใส่ Token และ Sync Key');return}if(!navigator.onLine){ghStatus('ออฟไลน์');return}ghBusy=true;try{ghStatus('กำลังตรวจรูปเก่า...');await migrateLocalImages();ghStatus('กำลังอ่าน GitHub...');let remote=await ghGet();if(remote.data)await mergeRemote(remote.data);ghStatus('กำลังบันทึก GitHub...');await ghPut(await localPayload(),ghSha);ghStatus('Sync สำเร็จ • '+new Date().toLocaleTimeString('th-TH'))}catch(e){console.error(e);ghStatus('Sync ไม่สำเร็จ');alert('GitHub/Cloudinary Sync ไม่สำเร็จ\n\n'+e.message)}finally{ghBusy=false}}
-async function pushCloud(){if(!gh.token||!gh.syncKey)throw new Error('ยังไม่ได้ตั้ง GitHub Token + Sync Key');if(!navigator.onLine)throw new Error('ไม่มีอินเทอร์เน็ต');await migrateLocalImages();let remote=await ghGet();if(remote.data)await mergeRemote(remote.data);await ghPut(await localPayload(),ghSha);ghStatus('บันทึก Cloud สำเร็จ')}
-const RETENTION_STATUS_FILE='data/retention-status.json';
-function retentionRawUrl(){return 'https://raw.githubusercontent.com/'+encodeURIComponent(gh.owner)+'/'+encodeURIComponent(gh.repo)+'/'+encodeURIComponent(gh.branch)+'/'+RETENTION_STATUS_FILE+'?t='+Date.now()}
-function retentionBangkokNow(){return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Bangkok'}))}
-function fmtTHDate(iso){if(!iso)return '-';let d=new Date(iso+'T00:00:00+07:00');return d.toLocaleDateString('th-TH',{day:'2-digit',month:'2-digit',year:'numeric'})}
-async function loadRetentionStatus(){let el=$('retentionStatus'),box=$('retentionBox');if(!el||!box)return;try{let r=await fetch(retentionRawUrl(),{cache:'no-store'});if(!r.ok){box.className='notice';el.textContent='ยังไม่มีสถานะการลบ (ระบบจะสร้างให้อัตโนมัติเมื่อ Workflow ทำงาน)';return}let j=await r.json(),today=retentionBangkokNow(),due=j.nextDeletionDate?new Date(j.nextDeletionDate+'T23:59:59+07:00'):null,days=due?Math.ceil((due-today)/86400000):99;box.className='notice '+(days<=0?'retentionDue':days<=7?'retentionWarn':'retentionOk');let msg=days<=0?'🔔 ถึงเวลารอบลบรูปเก่า':days<=7?'🔔 ใกล้ถึงรอบลบรูปเก่า':'🟢 รอบถัดไป';el.innerHTML=`${msg} • <b>${fmtTHDate(j.nextDeletionDate)}</b> • ชุดเดือน <b>${j.nextDeletionMonth||'-'}</b> • คาดว่าจะลบประมาณ <b>${Number(j.nextDeleteCount||0).toLocaleString('th-TH')}</b> รูป`+(j.lastDeletedMonth?`<br><span class="muted">ลบรอบล่าสุด: ${j.lastDeletedMonth} • ${Number(j.lastDeletedCount||0).toLocaleString('th-TH')} รูป</span>`:'')} }catch(e){box.className='notice';el.textContent='ตรวจสอบสถานะการลบไม่ได้'}}
+async function syncNow(){if(ghBusy)return;if(!gh.token||!gh.syncKey){ghStatus('กรุณาใส่ Token และ Sync Key');return}if(!navigator.onLine){ghStatus('ออฟไลน์');return}ghBusy=true;try{ghStatus('กำลังอ่าน GitHub...');let remote=await ghGet();if(remote.data)await mergeRemote(remote.data);let payload=await localPayload();ghStatus('กำลังบันทึก GitHub...');await ghPut(payload,ghSha);ghStatus('Sync สำเร็จ • '+new Date().toLocaleTimeString('th-TH'))}catch(e){console.error(e);ghStatus('Sync ไม่สำเร็จ');alert('GitHub Sync ไม่สำเร็จ\n\n'+e.message)}finally{ghBusy=false}}
+async function pushCloud(){if(!gh.token||!gh.syncKey)throw new Error('ยังไม่ได้ตั้ง GitHub Token + Sync Key');if(!navigator.onLine)throw new Error('ไม่มีอินเทอร์เน็ต');let remote=await ghGet();if(remote.data)await mergeRemote(remote.data);await ghPut(await localPayload(),ghSha);ghStatus('บันทึก Cloud สำเร็จ')}
 loadGH();
-setTimeout(()=>{if(gh.syncKey)pullNow().catch(()=>{});loadRetentionStatus().catch(()=>{});},1200);
-setInterval(()=>{if(gh.syncKey&&!ghBusy)pullNow().catch(()=>{});loadRetentionStatus().catch(()=>{})},60000);
+setTimeout(()=>{if(gh.syncKey)pullNow().catch(()=>{});},1200);
+setInterval(()=>{if(gh.syncKey&&!ghBusy)pullNow().catch(()=>{})},15000);
+init();
 </script></body></html>
