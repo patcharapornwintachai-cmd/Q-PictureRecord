@@ -45,7 +45,50 @@ $('code').oninput=e=>{let n=e.target.selectionStart;e.target.value=e.target.valu
 function read(f){return new Promise((ok,no)=>{let r=new FileReader();r.onload=()=>ok(r.result);r.onerror=no;r.readAsDataURL(f)})}
 async function files(fs){let left=6-imgs.length;if(fs.length>left)alert('เพิ่มได้อีก '+left+' รูป');for(let f of [...fs].slice(0,left))if(f.type.startsWith('image/'))imgs.push({type:f.type,data:await read(f)});renderPhotos()}
 camera.onchange=e=>{files(e.target.files);e.target.value=''};gallery.onchange=e=>{files(e.target.files);e.target.value=''};function renderPhotos(){$('pc').textContent=imgs.length+' / 6 รูป';$('preview').innerHTML=imgs.map((p,i)=>`<div class="photo"><img src="${p.data}"><button onclick="imgs.splice(${i},1);renderPhotos()">×</button></div>`).join('')}
-async function save(){let c=$('code').value.trim().toUpperCase(),b=$('batch').value.trim(),i=$('inspector').value;if(!c||!b||!i)return alert('⚠️ กรุณากรอกข้อมูลให้ครบก่อนบันทึก');if(!imgs.length)return alert('⚠️ กรุณาเพิ่มรูปอย่างน้อย 1 รูป');let r={id:crypto.randomUUID(),code:c,batch:b,inspector:i,inspectionDateTime:new Date().toISOString(),photos:[...imgs],updatedAt:Date.now()};await put(R,r);recs=await all(R);renderHistory();renderTable();try{ghStatus('กำลังอัปโหลดรูปไป Cloudinary...');await uploadRecordImages(r);await put(R,r);recs=await all(R);renderHistory();renderTable();await pushCloud();alert('✅ บันทึกข้อมูลเรียบร้อย\nรูปเก็บบน Cloudinary • ข้อมูล Sync ขึ้น GitHub แล้ว');clearForm()}catch(e){ghStatus('บันทึกในเครื่องแล้ว • รอ Sync');alert('⚠️ บันทึกในเครื่องแล้ว แต่ Sync Cloudinary/GitHub ไม่สำเร็จ\n'+e.message+'\n\nลองกด Sync Now อีกครั้งได้')}renderHistory();renderTable()}
+let saveInProgress=false;
+let lastSaveKey='';
+async function save(){
+  if(saveInProgress)return;
+  let c=$('code').value.trim().toUpperCase(),b=$('batch').value.trim(),i=$('inspector').value;
+  if(!c||!b||!i)return alert('⚠️ กรุณากรอกข้อมูลให้ครบก่อนบันทึก');
+  if(!imgs.length)return alert('⚠️ กรุณาเพิ่มรูปอย่างน้อย 1 รูป');
+  let photoSignature=imgs.map(p=>p.data||p.url||'').join('|');
+  let saveKey=c+'|'+b+'|'+i+'|'+photoSignature;
+  if(lastSaveKey===saveKey)return;
+  saveInProgress=true;
+  lastSaveKey=saveKey;
+  let btn=document.querySelector('button[onclick*=\"save()\"]');
+  let oldText=btn?btn.textContent:'💾 Save';
+  if(btn){btn.disabled=true;btn.textContent='⏳ กำลังบันทึก...';btn.style.opacity='0.65';btn.style.cursor='not-allowed'}
+  let r={id:crypto.randomUUID(),code:c,batch:b,inspector:i,inspectionDateTime:new Date().toISOString(),photos:[...imgs],updatedAt:Date.now(),saveStatus:'pending'};
+  try{
+    ghStatus('⏳ กำลังบันทึกข้อมูล...');
+    await put(R,r);
+    recs=await all(R);renderHistory();renderTable();
+    ghStatus('⏳ กำลังอัปโหลดรูป...');
+    await uploadRecordImages(r);
+    r.saveStatus='uploaded';r.updatedAt=Date.now();
+    await put(R,r);
+    recs=await all(R);renderHistory();renderTable();
+    ghStatus('⏳ กำลัง Sync ขึ้น GitHub...');
+    await pushCloud();
+    r.saveStatus='synced';r.updatedAt=Date.now();
+    await put(R,r);
+    recs=await all(R);renderHistory();renderTable();
+    ghStatus('✅ บันทึกสำเร็จ • Sync แล้ว');
+    alert('✅ บันทึกข้อมูลเรียบร้อยแล้ว\nรูปเก็บบน Cloudinary • ข้อมูล Sync ขึ้น GitHub แล้ว');
+    clearForm();
+  }catch(e){
+    console.error(e);
+    try{r.saveStatus='pending';r.updatedAt=Date.now();await put(R,r);recs=await all(R);renderHistory();renderTable()}catch(_){}
+    ghStatus('⚠️ บันทึกแล้ว • รอ Sync');
+    alert('⚠️ บันทึกข้อมูลไว้แล้ว แต่การ Sync ยังไม่สำเร็จ\n\n'+(e.message||e)+'\n\nระบบจะไม่สร้างรายการซ้ำจากการกด Save ซ้ำ');
+  }finally{
+    saveInProgress=false;
+    if(btn){btn.disabled=false;btn.textContent=oldText;btn.style.opacity='';btn.style.cursor=''}
+  }
+}
+
 function clearForm(){$('code').value='';$('batch').value='';imgs=[];renderPhotos()}
 async function renderIns(){
   let cur=$('inspector').value;
