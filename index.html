@@ -1,7 +1,7 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>QC Photo Record V6 + Cloudinary</title><style>
+<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Q-Snap • Quality Photo Record</title><style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,"Noto Sans Thai",sans-serif;background:#f4f7fb;color:#172033}header{background:#2563eb;color:#fff;padding:16px;position:sticky;top:0;z-index:5}header h1{margin:0;font-size:22px}header p{margin:4px 0 0;font-size:12px}nav{display:flex;background:#fff;position:sticky;top:67px;z-index:4;border-bottom:1px solid #ddd}nav button{flex:1;padding:13px;border:0;background:#fff;font-weight:bold;color:#667085}nav button.active{color:#2563eb;border-bottom:3px solid #2563eb}main{max-width:1100px;margin:auto;padding:14px}.page{display:none}.page.active{display:block}.card{background:#fff;border-radius:15px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #0001}.grid,.filters{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.full{grid-column:1/-1}label{font-weight:bold;font-size:13px;display:block;margin-bottom:6px}input,select{width:100%;padding:11px;border:1px solid #ccd5e1;border-radius:9px;font:inherit}select[multiple]{min-height:110px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.btn{border:0;border-radius:9px;padding:10px 13px;font-weight:bold;cursor:pointer}.primary{background:#2563eb;color:#fff}.gray{background:#e9eef5}.green{background:#dcfce7;color:#166534}.red{background:#fee2e2;color:#991b1b}.blue{background:#eef2ff;color:#1e40af}.photoBtns{display:flex;gap:8px;flex-wrap:wrap}.photoBtn{background:#eef2ff;color:#1e40af;padding:11px;border-radius:9px;font-weight:bold;cursor:pointer}.photoBtn input{display:none}.preview{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.photo{position:relative;aspect-ratio:1;border:1px solid #ddd;border-radius:9px;overflow:hidden}.photo img{width:100%;height:100%;object-fit:cover}.photo button{position:absolute;right:4px;top:4px;border:0;border-radius:50%;background:#000b;color:#fff;width:28px;height:28px}.muted{font-size:12px;color:#667085;margin-top:5px}.historyPics{display:flex;gap:5px;align-items:center;flex-wrap:wrap}.historyPic{width:62px;height:62px;object-fit:cover;border-radius:7px;border:1px solid #dbe2ea;background:#f8fafc;cursor:pointer}.noPic{color:#98a2b3;font-size:11px}.table{overflow:auto;max-height:600px;border:1px solid #ddd;border-radius:9px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:8px;border-bottom:1px solid #ddd;white-space:nowrap;text-align:left}th{background:#f8fafc}.modal{display:none;position:fixed;inset:0;background:#0008;z-index:20;align-items:center;justify-content:center;padding:15px}.modal.show{display:flex}.box{background:#fff;padding:20px;border-radius:14px;width:min(400px,100%)}.notice{padding:10px;background:#eff6ff;border-radius:9px;color:#1e40af;font-size:13px}@media(max-width:700px){.grid,.filters{grid-template-columns:1fr}.full{grid-column:auto}.preview{grid-template-columns:repeat(2,1fr)}}
 </style></head><body>
-<header><h1>📋 QC Photo Record V6</h1><p>Record • History • Setting</p></header><nav><button id="tRecord" class="active" onclick="page('record')">📝 Record</button><button id="tHistory" onclick="page('history')">🗂️ History</button><button id="tSetting" onclick="auth('setting')">⚙️ Setting 🔐</button></nav><main>
+<header><h1>📸 Q-Snap</h1><p>Quality Photo Record • Record • History • Setting</p></header><nav><button id="tRecord" class="active" onclick="page('record')">📝 Record</button><button id="tHistory" onclick="page('history')">🗂️ History</button><button id="tSetting" onclick="auth('setting')">⚙️ Setting 🔐</button></nav><main>
 <section id="record" class="page active"><div class="card"><h2>📝 Record</h2><div class="grid">
 <div><label>Code</label><input id="code" list="codeList" autocomplete="off" placeholder="กรอก Code"><datalist id="codeList"></datalist><div class="muted"></div></div>
 <div><label>Batch No.</label><input id="batch" inputmode="numeric" placeholder="กรอก Batch"></div>
@@ -27,7 +27,7 @@
 <div class="notice" style="margin-top:10px">⚠️ อย่าใส่ Token ลงในโค้ดหรือส่งให้ผู้อื่น • Token ถูกเก็บเฉพาะ Browser เครื่องนี้</div>
 </div>
 <div class="card"><h2>⚙️ Setting</h2><div class="notice">เฉพาะเจ้าหน้าที่</div><div id="retentionNotice" class="notice" style="margin-top:10px">กำลังตรวจสอบรอบลบข้อมูล...</div><div class="actions" style="margin-top:10px"><button class="btn red" onclick="reviewRetention()">🗑️ ตรวจสอบ/ลบข้อมูลครบ 3 เดือน</button></div><label style="margin-top:12px">ตั้งรหัสใหม่</label><input id="newpw" type="password" inputmode="numeric"><div class="actions"><button class="btn primary" onclick="setPw()">💾 บันทึกรหัส</button></div></div>
-<div class="card"><h2>👤 Inspector</h2><div id="ilist"></div><div class="actions"><button class="btn green" onclick="addI()">➕ เพิ่ม Inspector</button></div><div class="muted">แก้ไข/ลบเฉพาะรายการสำหรับข้อมูลใหม่ ไม่กระทบข้อมูลที่เคยบันทึก</div></div>
+<div class="card"><h2>👤 Inspector</h2><div class="actions" style="margin-bottom:10px"><input id="newInspectorName" placeholder="พิมพ์ชื่อ Inspector ใหม่" style="flex:1"><button class="btn green" type="button" onclick="addInspectorInline()">➕ เพิ่ม</button></div><div id="ilist"></div><div class="muted">แก้ไข/ลบเฉพาะรายการสำหรับข้อมูลใหม่ ไม่กระทบข้อมูลที่เคยบันทึก</div></div>
 </section>
 </main><div id="imageModal" class="modal" onclick="closeImage(event)"><div class="box" style="max-width:900px;text-align:center"><img id="bigImage" style="max-width:100%;max-height:75vh;object-fit:contain;border-radius:10px"></div></div><div id="modal" class="modal"><div class="box"><h3>🔐 ใส่รหัส</h3><input id="pw" type="password" inputmode="numeric"><div class="actions"><button class="btn primary" onclick="verify()">ยืนยัน</button><button class="btn gray" onclick="closeM()">ยกเลิก</button></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script><script>
@@ -94,16 +94,73 @@ async function renderIns(){
   let cur=$('inspector').value;
   let deleted=await setting('deletedInspectors',[]);
   let historical=[...new Set((recs||[]).map(r=>String(r.inspector||'')).filter(Boolean))];
-  let allForFilter=[...new Set([...ins,...deleted,...historical])].filter(Boolean).sort((a,b)=>a.localeCompare(b,'th'));
+  let allForFilter=[...new Set([...ins,...historical])].filter(Boolean).sort((a,b)=>a.localeCompare(b,'th'));
   $('inspector').innerHTML='<option value="">-- เลือก Inspector --</option>'+ins.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
   $('inspector').value=ins.includes(cur)?cur:'';
   $('fins').innerHTML='<option value="">ทั้งหมด</option>'+allForFilter.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
 }
 function renderSetting(){$('ilist').innerHTML=ins.map((x,i)=>`<div class="actions" style="margin-bottom:7px"><input id="ii${i}" value="${esc(x)}" style="flex:1"><button class="btn blue" onclick="renameI(${i})">✏️</button><button class="btn red" onclick="delI(${i})">🗑️</button></div>`).join('')}
-async function persistIns(){await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});try{await pushCloud();alert('บันทึก Inspector และ Sync แล้ว')}catch(e){alert('บันทึก Inspector ในเครื่องแล้ว แต่ Sync ไม่สำเร็จ\n'+e.message)}renderIns();renderSetting()}
-async function addI(){let n=prompt('ชื่อ Inspector')?.trim();if(!n)return;if(ins.includes(n))return alert('มีชื่อนี้แล้ว');let removed=await setting('deletedInspectors',[]);removed=removed.filter(x=>String(x)!==String(n));await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});ins.push(n);await persistIns()}
+const normInspectorName=x=>String(x??'').trim().replace(/\s+/g,' ').toLowerCase();
+const cleanInspectorName=x=>String(x??'').trim().replace(/\s+/g,' ');
+async function persistIns(){
+  ins=[...new Map((ins||[]).map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
+  await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});
+  try{await pushCloudInspector();alert('บันทึก Inspector และ Sync แล้ว')}
+  catch(e){alert('บันทึก Inspector ในเครื่องแล้ว แต่ Sync ไม่สำเร็จ\n'+e.message)}
+  renderIns();renderSetting()
+}
+async function pushCloudInspector(){
+  if(!gh.token||!gh.syncKey)throw new Error('ยังไม่ได้ตั้ง GitHub Token + Sync Key');
+  if(!navigator.onLine)throw new Error('ไม่มีอินเทอร์เน็ต');
+  let remote=await ghGet();
+  let payload=remote.data||{};
+  let remoteIns=Array.isArray(payload.inspectors)?payload.inspectors:[];
+  let remoteDeleted=Array.isArray(payload.deletedInspectors)?payload.deletedInspectors:[];
+  let active=[...new Map([...remoteIns,...(ins||[])].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
+  let activeNorm=new Set(active.map(normInspectorName));
+  let deleted=[...new Map([...remoteDeleted,...(await setting('deletedInspectors',[]))].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()]
+    .filter(x=>x && !activeNorm.has(normInspectorName(x)));
+  payload={...payload,inspectors:active,deletedInspectors:deleted,updatedAt:Date.now()};
+  await ghPut(payload,ghSha);
+  ins=active;
+  await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});
+  await put(S,{key:'deletedInspectors',value:deleted,updatedAt:Date.now()});
+  ghStatus('บันทึก Inspector สำเร็จ');
+}
+async function addInspectorInline(){
+  let el=$('newInspectorName');
+  let n=cleanInspectorName(el.value||'');
+  if(!n)return alert('กรุณาใส่ชื่อ Inspector');
+  let key=normInspectorName(n);
+  if((ins||[]).some(x=>normInspectorName(x)===key))return alert('มีชื่อ Inspector นี้อยู่แล้ว');
+  let removed=await setting('deletedInspectors',[]);
+  removed=(removed||[]).filter(x=>normInspectorName(x)!==key);
+  ins=[...(ins||[]),n];
+  await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});
+  await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});
+  el.value='';
+  renderIns();
+  renderSetting();
+  try{await pushCloudInspector();alert('เพิ่ม Inspector “'+n+'” เรียบร้อยแล้ว และ Sync แล้ว')}
+  catch(e){alert('เพิ่ม Inspector ในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n\n'+e.message)}
+}
+async function addI(){
+  let n=prompt('กรุณาใส่ชื่อ Inspector ที่ต้องการเพิ่ม')?.trim();
+  if(!n)return;
+  n=cleanInspectorName(n);
+  let key=normInspectorName(n);
+  if((ins||[]).some(x=>normInspectorName(x)===key))return alert('มีชื่อ Inspector นี้อยู่แล้ว');
+  let removed=await setting('deletedInspectors',[]);
+  removed=(removed||[]).filter(x=>normInspectorName(x)!==key);
+  ins=[...(ins||[]),n];
+  await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});
+  await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});
+  renderIns();renderSetting();
+  try{await pushCloudInspector();alert('เพิ่ม Inspector “'+n+'” เรียบร้อยแล้ว และ Sync แล้ว')}
+  catch(e){alert('เพิ่ม Inspector ในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n\n'+e.message)}
+}
 async function renameI(i){let n=$('ii'+i).value.trim();if(!n)return;let old=ins[i];if(ins.some((x,j)=>j!==i&&x===n))return alert('มีชื่อนี้แล้ว');ins[i]=n;let removed=await setting('deletedInspectors',[]);removed=removed.filter(x=>String(x)!==String(n));if(old&&old!==n&&!removed.includes(old))removed.push(old);await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});await persistIns();alert('แก้ไข Inspector เรียบร้อย')}
-async function delI(i){let name=ins[i];if(name==null)return;if(!confirm('ยืนยันลบ Inspector “'+name+'” ?\n\nข้อมูลเก่าที่บันทึกแล้วจะไม่ถูกลบ และชื่อจะยังแสดงใน History ได้ตามเดิม'))return;let removed=await setting('deletedInspectors',[]);if(!removed.includes(name))removed.push(name);await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});ins.splice(i,1);await persistIns();alert('ลบ Inspector “'+name+'” เรียบร้อยแล้ว')}
+async function delI(i){let name=ins[i];if(name==null)return;if(!confirm('ยืนยันลบ Inspector “'+name+'” ?\n\nข้อมูลเก่าที่บันทึกแล้วจะไม่ถูกลบ และชื่อจะยังแสดงใน History ได้ตามเดิม'))return;let removed=await setting('deletedInspectors',[]);if(!removed.some(x=>String(x).toLowerCase()===String(name).toLowerCase()))removed.push(name);await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});ins.splice(i,1);await persistIns();alert('ลบ Inspector “'+name+'” เรียบร้อยแล้ว')}
 function endOfMonth(d){return new Date(d.getFullYear(),d.getMonth()+1,0,23,59,59,999)}
 function addMonths(d,n){let x=new Date(d);let day=x.getDate();x.setDate(1);x.setMonth(x.getMonth()+n);let last=new Date(x.getFullYear(),x.getMonth()+1,0).getDate();x.setDate(Math.min(day,last));return x}
 function retentionDue(r){let created=new Date(r.inspectionDateTime||r.updatedAt||0);if(!created.getTime())return null;let three=addMonths(created,3);return endOfMonth(three)}
@@ -212,10 +269,33 @@ async function encryptCloud(obj){let salt=crypto.getRandomValues(new Uint8Array(
 async function decryptCloud(text){if(!text||!text.trim())return null;let x;try{x=JSON.parse(text)}catch(e){throw new Error('ไฟล์ข้อมูลบน GitHub ไม่ใช่ JSON ที่สมบูรณ์')}if(!x||!x.data||!x.iv||!x.salt)throw new Error('ไฟล์ข้อมูลบน GitHub เสียหายหรือว่าง');let key=await deriveKey(gh.syncKey,b64ToBytes(x.salt));let plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64ToBytes(x.iv)},key,b64ToBytes(x.data));return JSON.parse(new TextDecoder().decode(plain))}
 async function ghGet(){if(!gh.token)throw new Error('ต้องใช้ Token สำหรับการเขียน GitHub');let r=await fetch(ghUrl()+'?ref='+encodeURIComponent(gh.branch)+'&t='+Date.now(),{headers:ghHeaders(),cache:'no-store'});if(r.status===404){ghSha=null;return {sha:null,data:null,empty:true}}if(!r.ok){let tx=await r.text();throw new Error('GitHub อ่านไฟล์ไม่ได้ ('+r.status+') '+tx.slice(0,180))}let j=await r.json();ghSha=j.sha;if(!j.content)return {sha:j.sha,data:null,empty:true};return {sha:j.sha,data:await decryptCloud(new TextDecoder().decode(b64ToBytes(j.content))),empty:false}}
 async function rawGet(){let r=await fetch(ghRawUrl()+'?t='+Date.now(),{cache:'no-store'});if(r.status===404)return {data:null,empty:true};if(!r.ok)throw new Error('GitHub โหลดข้อมูลไม่ได้ ('+r.status+')');return {data:await decryptCloud(await r.text()),empty:false}}
-async function ghPut(payload,sha){let text=await encryptCloud(payload),body={message:'QC Photo Record V6 sync',content:bytesToB64(new TextEncoder().encode(text)),branch:gh.branch};if(sha)body.sha=sha;let r=await fetch(ghUrl(),{method:'PUT',headers:ghHeaders(),body:JSON.stringify(body)});if(r.status===409){let latest=await ghGet();return ghPut(payload,latest.sha)}if(!r.ok){let tx=await r.text();throw new Error('GitHub บันทึกไม่ได้ ('+r.status+') '+tx.slice(0,180))}let j=await r.json();ghSha=j.content&&j.content.sha?j.content.sha:ghSha}
+async function ghPut(payload,sha){let text=await encryptCloud(payload),body={message:'Q-Snap sync',content:bytesToB64(new TextEncoder().encode(text)),branch:gh.branch};if(sha)body.sha=sha;let r=await fetch(ghUrl(),{method:'PUT',headers:ghHeaders(),body:JSON.stringify(body)});if(r.status===409){let latest=await ghGet();return ghPut(payload,latest.sha)}if(!r.ok){let tx=await r.text();throw new Error('GitHub บันทึกไม่ได้ ('+r.status+') '+tx.slice(0,180))}let j=await r.json();ghSha=j.content&&j.content.sha?j.content.sha:ghSha}
 async function localPayload(){let compact=recs.map(r=>({...r,photos:(r.photos||[]).map(p=>{let q={...p};delete q.data;return q})}));return {version:6,updatedAt:Date.now(),records:compact,inspectors:await setting('inspectors',['Inspector 1']),deletedInspectors:await setting('deletedInspectors',[]),password:await setting('password','1166'),passwordUpdatedAt:Number(await setting('passwordUpdatedAt',0)),deletedIds:await setting('deletedIds',[])}}
 async function clearStoreSafe(store){return new Promise((ok,no)=>{let r=db.transaction(store,'readwrite').objectStore(store).clear();r.onsuccess=()=>ok();r.onerror=()=>no(r.error)})}
-async function mergeRemote(remote){if(!remote||typeof remote!=='object')return;let dels=[...new Set([...(await setting('deletedIds',[])),...(remote.deletedIds||[])].map(String))];let map=new Map(recs.map(r=>[String(r.id),r]));for(let rr of (remote.records||[])){let id=String(rr.id);if(!map.has(id)||Number(rr.updatedAt||0)>Number(map.get(id).updatedAt||0))map.set(id,rr)}for(let id of dels)map.delete(id);recs=[...map.values()];await clearStoreSafe(R);for(let r of recs)await put(R,r);await put(S,{key:'deletedIds',value:dels,updatedAt:Date.now()});let localIns=await setting('inspectors',['Inspector 1']);let localDeletedIns=await setting('deletedInspectors',[]);let remoteDeletedIns=Array.isArray(remote.deletedInspectors)?remote.deletedInspectors:[];let deletedIns=[...new Set([...(localDeletedIns||[]),...(remoteDeletedIns||[])].map(String))];ins=[...new Set([...(remote.inspectors||[]),...(localIns||[])])].filter(Boolean).filter(x=>!deletedIns.includes(String(x)));await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});await put(S,{key:'deletedInspectors',value:deletedIns,updatedAt:Date.now()});let lpa=Number(await setting('passwordUpdatedAt',0)),rpa=Number(remote.passwordUpdatedAt||0);if(rpa>lpa)await put(S,{key:'password',value:remote.password,passwordUpdatedAt:rpa});renderIns();renderHistory();renderTable();renderSetting()}
+async function mergeRemote(remote){
+  if(!remote||typeof remote!=='object')return;
+  let dels=[...new Set([...(await setting('deletedIds',[])),...(remote.deletedIds||[])].map(String))];
+  let map=new Map(recs.map(r=>[String(r.id),r]));
+  for(let rr of (remote.records||[])){let id=String(rr.id);if(!map.has(id)||Number(rr.updatedAt||0)>Number(map.get(id).updatedAt||0))map.set(id,rr)}
+  for(let id of dels)map.delete(id);
+  recs=[...map.values()];
+  await clearStoreSafe(R);for(let r of recs)await put(R,r);
+  await put(S,{key:'deletedIds',value:dels,updatedAt:Date.now()});
+
+  let localIns=await setting('inspectors',['Inspector 1']);
+  let localDeletedIns=await setting('deletedInspectors',[]);
+  let remoteIns=Array.isArray(remote.inspectors)?remote.inspectors:[];
+  let remoteDeletedIns=Array.isArray(remote.deletedInspectors)?remote.deletedInspectors:[];
+  let active=[...new Map([...(remoteIns||[]),...(localIns||[])].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
+  let activeNorm=new Set(active.map(normInspectorName));
+  let deletedIns=[...new Map([...(localDeletedIns||[]),...(remoteDeletedIns||[])].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()]
+    .filter(x=>x && !activeNorm.has(normInspectorName(x)));
+  ins=active;
+  await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});
+  await put(S,{key:'deletedInspectors',value:deletedIns,updatedAt:Date.now()});
+  let lpa=Number(await setting('passwordUpdatedAt',0)),rpa=Number(remote.passwordUpdatedAt||0);if(rpa>lpa)await put(S,{key:'password',value:remote.password,passwordUpdatedAt:rpa});
+  renderIns();renderHistory();renderTable();renderSetting()
+}
 async function pullNow(){if(ghBusy||!gh.syncKey)return;if(!navigator.onLine){ghStatus('ออฟไลน์');return}ghBusy=true;try{ghStatus('กำลังโหลดจาก GitHub...');let remote=await rawGet();if(remote.data){await mergeRemote(remote.data);ghStatus('โหลดจาก GitHub สำเร็จ • '+new Date().toLocaleTimeString('th-TH'))}else ghStatus('ยังไม่มีข้อมูลบน GitHub')}catch(e){console.error(e);ghStatus('โหลดไม่สำเร็จ');throw e}finally{ghBusy=false}}
 async function syncNow(){if(ghBusy)return;if(!gh.token||!gh.syncKey){ghStatus('กรุณาใส่ Token และ Sync Key');return}if(!navigator.onLine){ghStatus('ออฟไลน์');return}ghBusy=true;try{ghStatus('กำลังตรวจรูปเก่า...');await migrateLocalImages();ghStatus('กำลังอ่าน GitHub...');let remote=await ghGet();if(remote.data)await mergeRemote(remote.data);let payload=await localPayload();ghStatus('กำลังบันทึก GitHub...');await ghPut(payload,ghSha);ghStatus('Sync สำเร็จ • '+new Date().toLocaleTimeString('th-TH'))}catch(e){console.error(e);ghStatus('Sync ไม่สำเร็จ');alert('GitHub / Cloudinary Sync ไม่สำเร็จ\n\n'+e.message)}finally{ghBusy=false}}
 async function pushCloud(){if(!gh.token||!gh.syncKey)throw new Error('ยังไม่ได้ตั้ง GitHub Token + Sync Key');if(!navigator.onLine)throw new Error('ไม่มีอินเทอร์เน็ต');await migrateLocalImages();let remote=await ghGet();if(remote.data)await mergeRemote(remote.data);await ghPut(await localPayload(),ghSha);ghStatus('บันทึก Cloud สำเร็จ')}
