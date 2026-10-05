@@ -195,7 +195,41 @@ function retentionDue(r){let created=new Date(r.inspectionDateTime||r.updatedAt|
 function retentionInfo(){let now=new Date(),run=retentionRunDate(now),due=run?recs.filter(r=>retentionDue(r)):[],next=nextRetentionRun(now);return {due,next,run}}
 function renderRetention(){let el=$('retentionNotice');if(!el)return;let {due,next,run}=retentionInfo();if(run&&due.length){el.innerHTML='🔴 <b>รอบลบข้อมูลประจำงวดวันนี้: '+due.length+' รายการ</b><br>รอบลบ: '+run.toLocaleDateString('th-TH')+'<br>ข้อมูลที่เข้าเกณฑ์คือข้อมูลที่มีอายุอย่างน้อย 3 เดือน ณ วันสิ้นรอบ';el.style.background='#fee2e2';el.style.color='#991b1b'}else if(run){el.innerHTML='🟡 <b>วันนี้เป็นรอบลบข้อมูล แต่ยังไม่มีรายการครบ 3 เดือน</b><br>รอบลบถัดไป: '+next.toLocaleDateString('th-TH');el.style.background='#fef3c7';el.style.color='#92400e'}else{el.innerHTML='🟢 <b>รอบลบถัดไป: '+next.toLocaleDateString('th-TH')+'</b><br>ระบบจะตรวจข้อมูลที่อายุครบอย่างน้อย 3 เดือนในวันสิ้นรอบ';el.style.background='#ecfdf5';el.style.color='#166534'}}
 async function reviewRetention(){let {due}=retentionInfo();if(!due.length)return alert('ตอนนี้ยังไม่มีข้อมูลที่ครบกำหนดลบ 3 เดือน');let list=due.slice(0,20).map(r=>`${r.code} / ${r.batch} / ${r.inspector} / ${new Date(r.inspectionDateTime||r.updatedAt).toLocaleDateString('th-TH')}`).join('\n');let more=due.length>20?'\n... และอีก '+(due.length-20)+' รายการ':'';if(!confirm('⚠️ พบข้อมูลครบกำหนดลบ 3 เดือน '+due.length+' รายการ\n\n'+list+more+'\n\nข้อมูลที่ลบจะไม่แสดงใน History อีก\n\nยืนยันลบข้อมูลที่ครบกำหนดทั้งหมดหรือไม่?'))return;let deletePics=due.flatMap(r=>(r.photos||[]).map(p=>p.public_id).filter(Boolean));try{let ids=due.map(r=>String(r.id));for(let r of due)await remove(R,r.id);recs=await all(R);let ds=await setting('deletedIds',[]);let existing=new Set((ds||[]).map(String));for(let id of ids)if(!existing.has(id)){ds.push(id);existing.add(id)}await put(S,{key:'deletedIds',value:ds,updatedAt:Date.now()});renderHistory();renderTable();renderRetention();try{await pushCloud();let qok=await syncCloudinaryDeletes(deletePics);alert(qok?'✅ ลบข้อมูลครบ 3 เดือนเรียบร้อย และส่งคำสั่งลบรูป Cloudinary แล้ว':'✅ ลบข้อมูลครบ 3 เดือนแล้ว แต่คิวลบรูป Cloudinary ยังไม่ถูกส่ง')}catch(e){alert('ลบข้อมูลในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n'+e.message)}}catch(e){alert('❌ ลบข้อมูลไม่สำเร็จ\n'+e.message)}}
-async function exportExcel(){let a=filtered();if(!a.length)return alert('ไม่มีข้อมูลสำหรับ Export');if(!window.ExcelJS)return alert('กรุณาเชื่อมต่ออินเทอร์เน็ตเพื่อโหลด ExcelJS');let w=new ExcelJS.Workbook(),s=w.addWorksheet('QC Records');s.columns=[{header:'No.',key:'n',width:7},{header:'Code',key:'c',width:20},{header:'Batch',key:'b',width:18},{header:'Inspector',key:'i',width:20},{header:'Inspection Date/Time',key:'d',width:24},{header:'Photo 1',width:18},{header:'Photo 2',width:18},{header:'Photo 3',width:18},{header:'Photo 4',width:18},{header:'Photo 5',width:18},{header:'Photo 6',width:18}];s.getRow(1).font={bold:true};s.views=[{state:'frozen',ySplit:1}];for(let k=0;k<a.length;k++){let r=a[k],row=s.addRow({n:k+1,c:r.code,b:r.batch,i:r.inspector,d:new Date(r.inspectionDateTime).toLocaleString('th-TH')});row.height=125;for(let j=0;j<(r.photos||[]).slice(0,6).length;j++){let p=r.photos[j];try{let ext=(p.type||'').includes('png')?'png':'jpeg',buf=await imageBufferFromPhoto(p),id=w.addImage({buffer:buf,extension:ext});s.addImage(id,{tl:{col:5+j,row:row.number-1},ext:{width:115,height:115}})}catch(e){console.warn('Export photo skipped',e)}}}let out=await w.xlsx.writeBuffer(),a1=document.createElement('a');a1.href=URL.createObjectURL(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));a1.download=`QC_Photo_Record_V6_${a.length===recs.length?'ALL':'FILTERED'}.xlsx`;a1.click()}
+async function exportExcel(){
+  let a=filtered();
+  if(!a.length)return alert('ไม่มีข้อมูลสำหรับ Export');
+  if(!window.ExcelJS)return alert('กรุณาเชื่อมต่ออินเทอร์เน็ตเพื่อโหลด ExcelJS');
+  let w=new ExcelJS.Workbook(),s=w.addWorksheet('QC Records');
+  s.columns=[{header:'No.',key:'n',width:7},{header:'Code',key:'c',width:20},{header:'Batch',key:'b',width:18},{header:'Inspector',key:'i',width:20},{header:'Inspection Date/Time',key:'d',width:24},{header:'Photo 1',width:18},{header:'Photo 2',width:18},{header:'Photo 3',width:18},{header:'Photo 4',width:18},{header:'Photo 5',width:18},{header:'Photo 6',width:18}];
+  s.getRow(1).font={bold:true};
+  s.views=[{state:'frozen',ySplit:1}];
+  let skipped=0;
+  for(let k=0;k<a.length;k++){
+    let r=a[k],row=s.addRow({n:k+1,c:r.code,b:r.batch,i:r.inspector,d:new Date(r.inspectionDateTime).toLocaleString('th-TH')});
+    row.height=125;
+    for(let j=0;j<(r.photos||[]).slice(0,6).length;j++){
+      let p=r.photos[j];
+      try{
+        let ext=(p.format||((p.type||'').includes('png')?'png':'jpeg')).toLowerCase();
+        if(ext==='jpg')ext='jpeg';
+        if(!['jpeg','png','gif'].includes(ext))ext='jpeg';
+        let buf=await imageBufferFromPhoto(p),id=w.addImage({buffer:buf,extension:ext});
+        s.addImage(id,{tl:{col:5+j,row:row.number-1},ext:{width:115,height:115}});
+      }catch(e){
+        skipped++;
+        row.getCell(6+j).value='⚠️ รูปโหลดไม่ได้';
+        console.warn('Export photo skipped',e);
+      }
+    }
+  }
+  let out=await w.xlsx.writeBuffer(),a1=document.createElement('a');
+  a1.href=URL.createObjectURL(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  a1.download=`Q-Snap_Photo_Record_${a.length===recs.length?'ALL':'FILTERED'}.xlsx`;
+  a1.click();
+  setTimeout(()=>URL.revokeObjectURL(a1.href),1000);
+  if(skipped)alert('Export เสร็จแล้ว แต่มีรูป '+skipped+' รูปที่โหลดจาก Cloudinary ไม่ได้ จึงใส่ข้อความแจ้งไว้ใน Excel');
+  else alert('✅ Export Excel เสร็จแล้ว พร้อมรูปภาพทั้งหมด');
+}
 
 
 async function setPw(){
@@ -213,8 +247,60 @@ async function setPw(){
   }
 }
 function filtered(){let q=$('search').value.trim().toLowerCase(),i=$('fins').value,s=$('start').value,e=$('end').value;return recs.filter(r=>{let d=r.inspectionDateTime.slice(0,10);return(!q||`${r.code} ${r.batch} ${r.inspector}`.toLowerCase().includes(q))&&(!i||r.inspector===i)&&(!s||d>=s)&&(!e||d<=e)}).sort((a,b)=>new Date(b.inspectionDateTime||b.updatedAt||0)-new Date(a.inspectionDateTime||a.updatedAt||0))}
+function cloudPhotoUrl(p){
+  if(!p)return '';
+  // Always prefer HTTPS so GitHub Pages (HTTPS) is not blocked by mixed content.
+  if(p.secure_url)return String(p.secure_url).replace(/^http:\/\//,'https://');
+  if(p.url)return String(p.url).replace(/^http:\/\//,'https://');
+  if(p.public_id){
+    let rt=p.resource_type||'image';
+    let fmt=p.format||'jpg';
+    let ver=p.version?`v${p.version}/`:'';
+    return `https://res.cloudinary.com/${CLOUD_NAME}/${rt}/upload/${ver}${p.public_id}.${fmt}`;
+  }
+  return p.data||'';
+}
+function openImage(src){
+  if(!src)return alert('ไม่พบรูปภาพ');
+  let im=$('bigImage');
+  im.onerror=()=>{im.onerror=null;alert('ไม่สามารถโหลดรูปจาก Cloudinary ได้\n\nลองเปิดรูปโดยตรงแทน');window.open(src,'_blank','noopener');};
+  im.onload=()=>{$('imageModal').classList.add('show')};
+  im.src=src;
+}
+function openPhotoById(id,index){
+  let r=(recs||[]).find(x=>String(x.id)===String(id));
+  let p=r&&Array.isArray(r.photos)?r.photos[index]:null;
+  let src=cloudPhotoUrl(p);
+  if(!src)return alert('ไม่พบรูปภาพ');
+  openImage(src);
+}
+function closeImage(e){
+  if(!e || e.target.id==='imageModal')$('imageModal').classList.remove('show');
+}
+function dataUrlToBytes(dataUrl){
+  let m=String(dataUrl||'').match(/^data:([^;]+);base64,(.+)$/);
+  if(!m)throw new Error('รูปในเครื่องไม่ใช่ Data URL ที่ถูกต้อง');
+  let bin=atob(m[2]),out=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)out[i]=bin.charCodeAt(i);
+  return out;
+}
+async function imageBufferFromPhoto(p){
+  if(p&&p.data)return dataUrlToBytes(p.data);
+  let src=cloudPhotoUrl(p);
+  if(!src)throw new Error('ไม่พบไฟล์รูป');
+  try{
+    let r=await fetch(src,{mode:'cors',cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return new Uint8Array(await r.arrayBuffer());
+  }catch(e){
+    let retry='';
+    if(p&&p.public_id){let fmt=p.format||'jpg',ver=p.version?`v${p.version}/`:'';retry=`https://res.cloudinary.com/${CLOUD_NAME}/${p.resource_type||'image'}/upload/${ver}${p.public_id}.${fmt}`}
+    if(retry&&retry!==src){try{let r2=await fetch(retry,{mode:'cors',cache:'no-store'});if(r2.ok)return new Uint8Array(await r2.arrayBuffer())}catch(_){} }
+    throw new Error('โหลดรูปจาก Cloudinary สำหรับ Excel ไม่สำเร็จ: '+(e.message||e));
+  }
+}
 function renderHistory(){let c=[...new Set(recs.map(r=>r.code))].filter(Boolean).sort();$('codeList').innerHTML=c.map(x=>`<option value="${esc(x)}">`).join('');renderIns()}
-function renderTable(){let a=filtered();$('total').textContent=recs.length;$('shown').textContent=a.length;$('tbody').innerHTML=a.length?a.map((r,n)=>{let pics=(r.photos||[]).map((p,j)=>{let src=p.url||p.data||'';return src?`<img class="historyPic" src="${esc(src)}" alt="Inspection ${j+1}" title="รูปที่ ${j+1}" onclick="openImage(this.src)">`:''}).join('');return `<tr><td>${n+1}</td><td>${esc(r.code)}</td><td>${esc(r.batch)}</td><td>${esc(r.inspector)}</td><td>${new Date(r.inspectionDateTime).toLocaleString('th-TH')}</td><td><div class="historyPics">${pics||'<span class="noPic">ไม่มีรูป</span>'}</div></td><td><button class="btn red" data-delete-id="${esc(String(r.id))}">🗑️</button></td></tr>`}).join(''):'<tr><td colspan="7">ไม่พบข้อมูล</td></tr>'}
+function renderTable(){let a=filtered();$('total').textContent=recs.length;$('shown').textContent=a.length;$('tbody').innerHTML=a.length?a.map((r,n)=>{let pics=(r.photos||[]).map((p,j)=>{let src=cloudPhotoUrl(p);return src?`<img class="historyPic" src="${esc(src)}" alt="Inspection ${j+1}" title="คลิกเพื่อดูรูปใหญ่" loading="lazy" onclick="openPhotoById('${esc(String(r.id))}',${j})">`:''}).join('');return `<tr><td>${n+1}</td><td>${esc(r.code)}</td><td>${esc(r.batch)}</td><td>${esc(r.inspector)}</td><td>${new Date(r.inspectionDateTime).toLocaleString('th-TH')}</td><td><div class="historyPics">${pics||'<span class="noPic">ไม่มีรูป</span>'}</div></td><td><button class="btn red" data-delete-id="${esc(String(r.id))}">🗑️</button></td></tr>`}).join(''):'<tr><td colspan="7">ไม่พบข้อมูล</td></tr>'}
 ['start','end'].forEach(id=>$(id).addEventListener('change',renderTable));['search','fins'].forEach(id=>$(id).addEventListener('input',renderTable));function resetF(){$('search').value='';$('fins').value='';$('start').value='';$('end').value='';renderTable()}
 document.addEventListener('click',e=>{let b=e.target.closest('[data-delete-id]');if(b){e.preventDefault();e.stopPropagation();auth('delete',String(b.dataset.deleteId));}});
 
@@ -254,7 +340,7 @@ async function uploadToCloudinary(p){
   }
   let j;try{j=JSON.parse(tx)}catch(_){throw new Error('Cloudinary ตอบกลับไม่ใช่ JSON')}
   if(!j.secure_url&&!j.url)throw new Error('Cloudinary อัปโหลดสำเร็จแต่ไม่พบ URL รูป');
-  return {...p,url:j.secure_url||j.url,public_id:j.public_id||'',resource_type:j.resource_type||'image',bytes:j.bytes||0,data:undefined};
+  return {...p,url:j.secure_url||j.url,secure_url:j.secure_url||j.url,public_id:j.public_id||'',resource_type:j.resource_type||'image',type:j.type||p.type||'upload',format:j.format||'jpg',version:j.version||0,bytes:j.bytes||0,data:undefined};
 }
 async function uploadRecordImages(r){
   let ps=r.photos||[];
