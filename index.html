@@ -114,12 +114,17 @@ async function pushCloudInspector(){
   if(!navigator.onLine)throw new Error('ไม่มีอินเทอร์เน็ต');
   let remote=await ghGet();
   let payload=remote.data||{};
+  let localActive=Array.isArray(ins)?ins:[];
+  let localDeleted=await setting('deletedInspectors',[]);
   let remoteIns=Array.isArray(payload.inspectors)?payload.inspectors:[];
   let remoteDeleted=Array.isArray(payload.deletedInspectors)?payload.deletedInspectors:[];
-  let active=[...new Map([...remoteIns,...(ins||[])].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
-  let activeNorm=new Set(active.map(normInspectorName));
-  let deleted=[...new Map([...remoteDeleted,...(await setting('deletedInspectors',[]))].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()]
-    .filter(x=>x && !activeNorm.has(normInspectorName(x)));
+  let localActiveNorm=new Set(localActive.map(normInspectorName));
+  let activeCandidates=[...new Map([...remoteIns,...localActive].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
+  let deleted=[...new Map([...remoteDeleted,...localDeleted].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
+  // ชื่อที่ Active ในเครื่องล่าสุดมีสิทธิ์เหนือสถานะ deleted จาก GitHub
+  deleted=deleted.filter(x=>!localActiveNorm.has(normInspectorName(x)));
+  let deletedNorm=new Set(deleted.map(normInspectorName));
+  let active=activeCandidates.filter(x=>!deletedNorm.has(normInspectorName(x)));
   payload={...payload,inspectors:active,deletedInspectors:deleted,updatedAt:Date.now()};
   await ghPut(payload,ghSha);
   ins=active;
@@ -160,13 +165,36 @@ async function addI(){
   catch(e){alert('เพิ่ม Inspector ในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n\n'+e.message)}
 }
 async function renameI(i){let n=$('ii'+i).value.trim();if(!n)return;let old=ins[i];if(ins.some((x,j)=>j!==i&&x===n))return alert('มีชื่อนี้แล้ว');ins[i]=n;let removed=await setting('deletedInspectors',[]);removed=removed.filter(x=>String(x)!==String(n));if(old&&old!==n&&!removed.includes(old))removed.push(old);await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});await persistIns();alert('แก้ไข Inspector เรียบร้อย')}
-async function delI(i){let name=ins[i];if(name==null)return;if(!confirm('ยืนยันลบ Inspector “'+name+'” ?\n\nข้อมูลเก่าที่บันทึกแล้วจะไม่ถูกลบ และชื่อจะยังแสดงใน History ได้ตามเดิม'))return;let removed=await setting('deletedInspectors',[]);if(!removed.some(x=>String(x).toLowerCase()===String(name).toLowerCase()))removed.push(name);await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});ins.splice(i,1);await persistIns();alert('ลบ Inspector “'+name+'” เรียบร้อยแล้ว')}
+async function delI(i){
+  let name=ins[i];
+  if(name==null)return;
+  if(!confirm('ยืนยันลบ Inspector “'+name+'” ?\n\nข้อมูลเก่าที่บันทึกแล้วจะไม่ถูกลบ และชื่อจะยังแสดงใน History ได้ตามเดิม'))return;
+  let key=normInspectorName(name);
+  let removed=await setting('deletedInspectors',[]);
+  removed=[...(removed||[])].filter(x=>normInspectorName(x)!==key);
+  removed.push(cleanInspectorName(name));
+  ins=(ins||[]).filter((x,j)=>j!==i && normInspectorName(x)!==key);
+  await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});
+  await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});
+  renderIns();renderSetting();
+  try{
+    await pushCloudInspector();
+    renderIns();renderSetting();
+    alert('ลบ Inspector “'+name+'” เรียบร้อยแล้ว\n\nข้อมูลเก่าใน History ยังคงอยู่ตามเดิม');
+  }catch(e){
+    alert('ลบ Inspector ในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n\n'+e.message);
+  }
+}
+
 function endOfMonth(d){return new Date(d.getFullYear(),d.getMonth()+1,0,23,59,59,999)}
 function addMonths(d,n){let x=new Date(d);let day=x.getDate();x.setDate(1);x.setMonth(x.getMonth()+n);let last=new Date(x.getFullYear(),x.getMonth()+1,0).getDate();x.setDate(Math.min(day,last));return x}
-function retentionDue(r){let created=new Date(r.inspectionDateTime||r.updatedAt||0);if(!created.getTime())return null;let three=addMonths(created,3);return endOfMonth(three)}
-function retentionInfo(){let now=new Date(),due=recs.filter(r=>{let d=retentionDue(r);return d&&d<=now}),soon=recs.filter(r=>{let d=retentionDue(r);return d&&d>now&&((d-now)<=7*86400000)});return {due,soon}}
-function renderRetention(){let el=$('retentionNotice');if(!el)return;let {due,soon}=retentionInfo();if(due.length){el.innerHTML='🔴 <b>มีข้อมูลครบกำหนดลบแล้ว '+due.length+' รายการ</b><br>กรุณาตรวจสอบและกดยืนยันการลบด้านล่าง';el.style.background='#fee2e2';el.style.color='#991b1b'}else if(soon.length){let dates=soon.map(r=>retentionDue(r)).sort((a,b)=>a-b),d=dates[0];el.innerHTML='🟡 <b>ใกล้ถึงรอบลบข้อมูล</b><br>มี '+soon.length+' รายการ จะครบกำหนดในไม่เกิน 7 วัน<br>รอบลบ: '+d.toLocaleDateString('th-TH');el.style.background='#fef3c7';el.style.color='#92400e'}else{el.innerHTML='🟢 <b>ยังไม่มีข้อมูลที่ใกล้ถึงรอบลบ 3 เดือน</b>';el.style.background='#ecfdf5';el.style.color='#166534'}}
-async function reviewRetention(){let {due}=retentionInfo();if(!due.length)return alert('ตอนนี้ยังไม่มีข้อมูลที่ครบกำหนดลบ 3 เดือน');let list=due.slice(0,20).map(r=>`${r.code} / ${r.batch} / ${r.inspector}`).join('\n');let more=due.length>20?'\n... และอีก '+(due.length-20)+' รายการ':'';if(!confirm('พบข้อมูลครบกำหนดลบ '+due.length+' รายการ\n\n'+list+more+'\n\nยืนยันลบข้อมูลที่ครบกำหนดทั้งหมดหรือไม่?'))return;try{let ids=new Set(due.map(r=>String(r.id)));for(let r of due)await remove(R,r.id);recs=await all(R);let ds=await setting('deletedIds',[]);for(let r of due)if(!ds.map(String).includes(String(r.id)))ds.push(r.id);await put(S,{key:'deletedIds',value:ds,updatedAt:Date.now()});renderTable();renderRetention();try{await pushCloud();alert('✅ ลบข้อมูลครบ 3 เดือนเรียบร้อย และ Sync ไป GitHub แล้ว')}catch(e){alert('ลบข้อมูลในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n'+e.message)}}catch(e){alert('❌ ลบข้อมูลไม่สำเร็จ\n'+e.message)}}
+function retentionRunDate(now){let y=now.getFullYear(),m=now.getMonth(),d=now.getDate();let allowed=[0,2,5,8,11];if(allowed.includes(m)){let last=new Date(y,m+1,0,23,59,59,999);if(d===last.getDate())return last}return null}
+function retentionCutoff(now){let run=retentionRunDate(now);if(!run)return null;let cutoff=new Date(run.getFullYear(),run.getMonth()-3+1,0,23,59,59,999);return cutoff}
+function nextRetentionRun(now){let y=now.getFullYear(),m=now.getMonth();let months=[0,2,5,8,11];for(let yy=y;yy<=y+1;yy++){for(let mm of months){if(yy===y&&mm<m)continue;let last=new Date(yy,mm+1,0,23,59,59,999);if(last>now)return last}}return new Date(y+1,0+1,0,23,59,59,999)}
+function retentionDue(r){let created=new Date(r.inspectionDateTime||r.updatedAt||0);if(!created.getTime())return null;let now=new Date(),cutoff=retentionCutoff(now);if(!cutoff||created>cutoff)return null;return retentionRunDate(now)}
+function retentionInfo(){let now=new Date(),run=retentionRunDate(now),due=run?recs.filter(r=>retentionDue(r)):[],next=nextRetentionRun(now);return {due,next,run}}
+function renderRetention(){let el=$('retentionNotice');if(!el)return;let {due,next,run}=retentionInfo();if(run&&due.length){el.innerHTML='🔴 <b>รอบลบข้อมูลประจำงวดวันนี้: '+due.length+' รายการ</b><br>รอบลบ: '+run.toLocaleDateString('th-TH')+'<br>ข้อมูลที่เข้าเกณฑ์คือข้อมูลที่มีอายุอย่างน้อย 3 เดือน ณ วันสิ้นรอบ';el.style.background='#fee2e2';el.style.color='#991b1b'}else if(run){el.innerHTML='🟡 <b>วันนี้เป็นรอบลบข้อมูล แต่ยังไม่มีรายการครบ 3 เดือน</b><br>รอบลบถัดไป: '+next.toLocaleDateString('th-TH');el.style.background='#fef3c7';el.style.color='#92400e'}else{el.innerHTML='🟢 <b>รอบลบถัดไป: '+next.toLocaleDateString('th-TH')+'</b><br>ระบบจะตรวจข้อมูลที่อายุครบอย่างน้อย 3 เดือนในวันสิ้นรอบ';el.style.background='#ecfdf5';el.style.color='#166534'}}
+async function reviewRetention(){let {due,run}=retentionInfo();if(!run)return alert('ยังไม่ถึงรอบลบข้อมูล รอบลบกำหนดเป็นสิ้นเดือน มกราคม, มีนาคม, มิถุนายน, กันยายน และธันวาคม');if(!due.length)return alert('รอบลบวันนี้ยังไม่มีข้อมูลที่ครบ 3 เดือน');let list=due.slice(0,20).map(r=>`${r.code} / ${r.batch} / ${r.inspector} / ${new Date(r.inspectionDateTime||r.updatedAt).toLocaleDateString('th-TH')}`).join('\n');let more=due.length>20?'\n... และอีก '+(due.length-20)+' รายการ':'';if(!confirm('⚠️ รอบลบข้อมูล '+run.toLocaleDateString('th-TH')+'\nพบข้อมูลอายุครบอย่างน้อย 3 เดือน '+due.length+' รายการ\n\n'+list+more+'\n\nข้อมูลที่ลบจะไม่แสดงใน History อีก\n\nยืนยันลบข้อมูลทั้งหมดในรอบนี้หรือไม่?'))return;try{let ids=due.map(r=>String(r.id));for(let r of due)await remove(R,r.id);recs=await all(R);let ds=await setting('deletedIds',[]);let existing=new Set((ds||[]).map(String));for(let id of ids)if(!existing.has(id)){ds.push(id);existing.add(id)}await put(S,{key:'deletedIds',value:ds,updatedAt:Date.now()});renderHistory();renderTable();renderRetention();try{await pushCloud();alert('✅ ลบข้อมูลรอบนี้เรียบร้อย และ Sync ไป GitHub แล้ว')}catch(e){alert('ลบข้อมูลในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n'+e.message)}}catch(e){alert('❌ ลบข้อมูลไม่สำเร็จ\n'+e.message)}}
 async function setPw(){let p=$('newpw').value.trim();if(!p)return alert('กรุณาใส่รหัสใหม่');let t=Date.now();await put(S,{key:'password',value:p,passwordUpdatedAt:t});$('newpw').value='';await pushCloud();alert('บันทึกรหัสแล้ว และ Sync แล้ว')}
 function filtered(){let q=$('search').value.trim().toLowerCase(),i=$('fins').value,s=$('start').value,e=$('end').value;return recs.filter(r=>{let d=r.inspectionDateTime.slice(0,10);return(!q||`${r.code} ${r.batch} ${r.inspector}`.toLowerCase().includes(q))&&(!i||r.inspector===i)&&(!s||d>=s)&&(!e||d<=e)}).sort((a,b)=>new Date(b.inspectionDateTime||b.updatedAt||0)-new Date(a.inspectionDateTime||a.updatedAt||0))}
 function renderHistory(){let c=[...new Set(recs.map(r=>r.code))].filter(Boolean).sort();$('codeList').innerHTML=c.map(x=>`<option value="${esc(x)}">`).join('');renderIns()}
@@ -286,11 +314,13 @@ async function mergeRemote(remote){
   let localDeletedIns=await setting('deletedInspectors',[]);
   let remoteIns=Array.isArray(remote.inspectors)?remote.inspectors:[];
   let remoteDeletedIns=Array.isArray(remote.deletedInspectors)?remote.deletedInspectors:[];
-  let active=[...new Map([...(remoteIns||[]),...(localIns||[])].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
-  let activeNorm=new Set(active.map(normInspectorName));
-  let deletedIns=[...new Map([...(localDeletedIns||[]),...(remoteDeletedIns||[])].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()]
-    .filter(x=>x && !activeNorm.has(normInspectorName(x)));
-  ins=active;
+  let localActiveNorm=new Set((localIns||[]).map(normInspectorName));
+  let activeCandidates=[...new Map([...(remoteIns||[]),...(localIns||[])].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
+  let deletedIns=[...new Map([...(localDeletedIns||[]),...(remoteDeletedIns||[])].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
+  // ถ้าเครื่องนี้เพิ่งเพิ่มชื่อกลับมา ให้ Active มีสิทธิ์เหนือ deleted จากเครื่องอื่น/GitHub
+  deletedIns=deletedIns.filter(x=>!localActiveNorm.has(normInspectorName(x)));
+  let deletedNorm=new Set(deletedIns.map(normInspectorName));
+  ins=activeCandidates.filter(x=>!deletedNorm.has(normInspectorName(x)));
   await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});
   await put(S,{key:'deletedInspectors',value:deletedIns,updatedAt:Date.now()});
   let lpa=Number(await setting('passwordUpdatedAt',0)),rpa=Number(remote.passwordUpdatedAt||0);if(rpa>lpa)await put(S,{key:'password',value:remote.password,passwordUpdatedAt:rpa});
