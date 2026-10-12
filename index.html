@@ -196,41 +196,58 @@ function retentionInfo(){let now=new Date(),run=retentionRunDate(now),due=run?re
 function renderRetention(){let el=$('retentionNotice');if(!el)return;let {due,next,run}=retentionInfo();if(run&&due.length){el.innerHTML='🔴 <b>รอบลบข้อมูลประจำงวดวันนี้: '+due.length+' รายการ</b><br>รอบลบ: '+run.toLocaleDateString('th-TH')+'<br>ข้อมูลที่เข้าเกณฑ์คือข้อมูลที่มีอายุอย่างน้อย 3 เดือน ณ วันสิ้นรอบ';el.style.background='#fee2e2';el.style.color='#991b1b'}else if(run){el.innerHTML='🟡 <b>วันนี้เป็นรอบลบข้อมูล แต่ยังไม่มีรายการครบ 3 เดือน</b><br>รอบลบถัดไป: '+next.toLocaleDateString('th-TH');el.style.background='#fef3c7';el.style.color='#92400e'}else{el.innerHTML='🟢 <b>รอบลบถัดไป: '+next.toLocaleDateString('th-TH')+'</b><br>ระบบจะตรวจข้อมูลที่อายุครบอย่างน้อย 3 เดือนในวันสิ้นรอบ';el.style.background='#ecfdf5';el.style.color='#166534'}}
 async function reviewRetention(){let {due}=retentionInfo();if(!due.length)return alert('ตอนนี้ยังไม่มีข้อมูลที่ครบกำหนดลบ 3 เดือน');let list=due.slice(0,20).map(r=>`${r.code} / ${r.batch} / ${r.inspector} / ${new Date(r.inspectionDateTime||r.updatedAt).toLocaleDateString('th-TH')}`).join('\n');let more=due.length>20?'\n... และอีก '+(due.length-20)+' รายการ':'';if(!confirm('⚠️ พบข้อมูลครบกำหนดลบ 3 เดือน '+due.length+' รายการ\n\n'+list+more+'\n\nข้อมูลที่ลบจะไม่แสดงใน History อีก\n\nยืนยันลบข้อมูลที่ครบกำหนดทั้งหมดหรือไม่?'))return;let deletePics=due.flatMap(r=>(r.photos||[]).map(p=>p.public_id).filter(Boolean));try{let ids=due.map(r=>String(r.id));for(let r of due)await remove(R,r.id);recs=await all(R);let ds=await setting('deletedIds',[]);let existing=new Set((ds||[]).map(String));for(let id of ids)if(!existing.has(id)){ds.push(id);existing.add(id)}await put(S,{key:'deletedIds',value:ds,updatedAt:Date.now()});renderHistory();renderTable();renderRetention();try{await pushCloud();let qok=await syncCloudinaryDeletes(deletePics);alert(qok?'✅ ลบข้อมูลครบ 3 เดือนเรียบร้อย และส่งคำสั่งลบรูป Cloudinary แล้ว':'✅ ลบข้อมูลครบ 3 เดือนแล้ว แต่คิวลบรูป Cloudinary ยังไม่ถูกส่ง')}catch(e){alert('ลบข้อมูลในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n'+e.message)}}catch(e){alert('❌ ลบข้อมูลไม่สำเร็จ\n'+e.message)}}
 async function exportExcel(){
-  let a=filtered();
-  if(!a.length)return alert('ไม่มีข้อมูลสำหรับ Export');
-  if(!window.ExcelJS)return alert('กรุณาเชื่อมต่ออินเทอร์เน็ตเพื่อโหลด ExcelJS');
-  let w=new ExcelJS.Workbook(),s=w.addWorksheet('QC Records');
-  s.columns=[{header:'No.',key:'n',width:7},{header:'Code',key:'c',width:20},{header:'Batch',key:'b',width:18},{header:'Inspector',key:'i',width:20},{header:'Inspection Date/Time',key:'d',width:24},{header:'Photo 1',width:18},{header:'Photo 2',width:18},{header:'Photo 3',width:18},{header:'Photo 4',width:18},{header:'Photo 5',width:18},{header:'Photo 6',width:18}];
-  s.getRow(1).font={bold:true};
-  s.views=[{state:'frozen',ySplit:1}];
-  let skipped=0;
-  for(let k=0;k<a.length;k++){
-    let r=a[k],row=s.addRow({n:k+1,c:r.code,b:r.batch,i:r.inspector,d:new Date(r.inspectionDateTime).toLocaleString('th-TH')});
-    row.height=125;
-    for(let j=0;j<(r.photos||[]).slice(0,6).length;j++){
-      let p=r.photos[j];
-      try{
-        let ext=(p.format||((p.type||'').includes('png')?'png':'jpeg')).toLowerCase();
-        if(ext==='jpg')ext='jpeg';
-        if(!['jpeg','png','gif'].includes(ext))ext='jpeg';
-        let buf=await imageBufferFromPhoto(p),id=w.addImage({buffer:buf,extension:ext});
-        s.addImage(id,{tl:{col:5+j,row:row.number-1},ext:{width:115,height:115}});
-      }catch(e){
-        skipped++;
-        row.getCell(6+j).value='⚠️ รูปโหลดไม่ได้';
-        console.warn('Export photo skipped',e);
+  const btn=document.querySelector('#history button[onclick="exportExcel()"]');
+  if(btn&&btn.disabled)return;
+  const oldText=btn?btn.textContent:'';
+  if(btn){btn.disabled=true;btn.textContent='⏳ กำลังสร้าง Excel...';}
+  try{
+    if(!window.ExcelJS)throw new Error('โหลด ExcelJS ไม่สำเร็จ กรุณาตรวจอินเทอร์เน็ตแล้วรีเฟรชหน้าเว็บ');
+    const a=filtered();
+    if(!a.length){alert('ไม่มีข้อมูลสำหรับ Export ตามเงื่อนไขที่เลือก');return;}
+    const w=new ExcelJS.Workbook();
+    w.creator='Q-Snap'; w.created=new Date();
+    const s=w.addWorksheet('QC Records');
+    s.columns=[{header:'No.',key:'n',width:7},{header:'Code',key:'c',width:20},{header:'Batch',key:'b',width:18},{header:'Inspector',key:'i',width:20},{header:'Inspection Date/Time',key:'d',width:24},{header:'Photo 1',width:18},{header:'Photo 2',width:18},{header:'Photo 3',width:18},{header:'Photo 4',width:18},{header:'Photo 5',width:18},{header:'Photo 6',width:18}];
+    s.getRow(1).font={bold:true}; s.views=[{state:'frozen',ySplit:1}];
+    let skipped=0,processed=0;
+    for(let k=0;k<a.length;k++){
+      const r=a[k]||{};
+      const row=s.addRow({n:k+1,c:r.code||'',b:r.batch||'',i:r.inspector||'',d:r.inspectionDateTime?new Date(r.inspectionDateTime).toLocaleString('th-TH'):''});
+      row.height=95;
+      const photos=Array.isArray(r.photos)?r.photos.slice(0,6):[];
+      for(let j=0;j<photos.length;j++){
+        const ph=photos[j];
+        try{
+          const buf=await imageBufferFromPhoto(ph);
+          let ext=String(ph.format||((ph.type||'').includes('png')?'png':'jpeg')).toLowerCase();
+          if(ext==='jpg')ext='jpeg';
+          if(!['jpeg','png','gif'].includes(ext))ext='jpeg';
+          const imageId=w.addImage({buffer:buf,extension:ext});
+          s.addImage(imageId,{tl:{col:5+j,row:row.number-1},ext:{width:82,height:82}});
+        }catch(err){
+          skipped++; row.getCell(6+j).value='รูปโหลดไม่ได้';
+          console.warn('Q-Snap export image failed',k,j,err);
+        }
       }
+      processed++;
+      if(btn)btn.textContent=`⏳ กำลังสร้าง Excel ${processed}/${a.length}`;
     }
+    const out=await w.xlsx.writeBuffer();
+    if(!out||!out.byteLength)throw new Error('สร้างไฟล์ Excel ไม่สำเร็จ ไฟล์ว่าง');
+    const blob=new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    link.href=url; link.download=`Q-Snap_Photo_Record_${a.length===recs.length?'ALL':'FILTERED'}_${new Date().toISOString().slice(0,10)}.xlsx`;
+    link.style.display='none'; document.body.appendChild(link); link.click(); link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),10000);
+    alert(skipped?`สร้างไฟล์ Excel แล้ว แต่มีรูป ${skipped} รูปที่อ่านไม่ได้ จึงแสดงข้อความ “รูปโหลดไม่ได้” ในช่องนั้น`:'✅ Export Excel สำเร็จ พร้อมรูปภาพที่ระบบอ่านได้');
+  }catch(e){
+    console.error('Q-Snap export failed:',e);
+    alert('❌ Export ไม่สำเร็จ\n\n'+(e&&e.message?e.message:String(e))+'\n\nหากยังไม่ได้ ให้เปิดหน้าเว็บใหม่แล้วลองอีกครั้ง');
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent=oldText||'📥 Export All / Filter';}
   }
-  let out=await w.xlsx.writeBuffer(),a1=document.createElement('a');
-  a1.href=URL.createObjectURL(new Blob([out],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
-  a1.download=`Q-Snap_Photo_Record_${a.length===recs.length?'ALL':'FILTERED'}.xlsx`;
-  a1.click();
-  setTimeout(()=>URL.revokeObjectURL(a1.href),1000);
-  if(skipped)alert('Export เสร็จแล้ว แต่มีรูป '+skipped+' รูปที่โหลดจาก Cloudinary ไม่ได้ จึงใส่ข้อความแจ้งไว้ใน Excel');
-  else alert('✅ Export Excel เสร็จแล้ว พร้อมรูปภาพทั้งหมด');
 }
-
 
 async function setPw(){
   let p=($('newpw').value||'').trim();
@@ -246,7 +263,7 @@ async function setPw(){
     alert('✅ เปลี่ยนรหัสในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n\n'+e.message);
   }
 }
-function filtered(){let q=$('search').value.trim().toLowerCase(),i=$('fins').value,s=$('start').value,e=$('end').value;return recs.filter(r=>{let d=r.inspectionDateTime.slice(0,10);return(!q||`${r.code} ${r.batch} ${r.inspector}`.toLowerCase().includes(q))&&(!i||r.inspector===i)&&(!s||d>=s)&&(!e||d<=e)}).sort((a,b)=>new Date(b.inspectionDateTime||b.updatedAt||0)-new Date(a.inspectionDateTime||a.updatedAt||0))}
+function filtered(){let q=$('search').value.trim().toLowerCase(),i=$('fins').value,s=$('start').value,e=$('end').value;return (recs||[]).filter(r=>{r=r||{};let raw=r.inspectionDateTime||r.updatedAt||'',dt=raw?new Date(raw):null,d=dt&&!isNaN(dt.getTime())?dt.toISOString().slice(0,10):'';return(!q||`${r.code||''} ${r.batch||''} ${r.inspector||''}`.toLowerCase().includes(q))&&(!i||r.inspector===i)&&(!s||(d&&d>=s))&&(!e||(d&&d<=e))}).sort((a,b)=>new Date(b.inspectionDateTime||b.updatedAt||0)-new Date(a.inspectionDateTime||a.updatedAt||0))}
 function cloudPhotoUrl(p){
   if(!p)return '';
   // Always prefer HTTPS so GitHub Pages (HTTPS) is not blocked by mixed content.
