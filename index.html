@@ -10,7 +10,7 @@
 <div class="actions"><button class="btn primary" onclick="save()">💾 บันทึกข้อมูล</button><button class="btn gray" onclick="clearForm()">↩️ ล้างข้อมูล</button></div></div></section>
 <section id="history" class="page"><div class="card"><h2>🗂️ History</h2><div class="filters"><div><label>🔎 ค้นหา</label><input id="search" placeholder="Code / Batch / Inspector"></div><div><label>Inspector</label><select id="fins"></select></div><div><label>วันที่เริ่ม</label><input id="start" type="date"></div><div><label>วันที่สิ้นสุด</label><input id="end" type="date"></div></div><div class="actions"><button class="btn gray" onclick="resetF()">Reset</button><button class="btn green" onclick="exportExcel()">📥 Export All / Filter</button></div><div class="muted">ข้อมูลทั้งหมด: <b id="total">0</b> | แสดง: <b id="shown">0</b></div></div><div class="card"><div class="table"><table><thead><tr><th>#</th><th>Code</th><th>Batch</th><th>Inspector</th><th>Date/Time</th><th>Inspection pic.</th><th>ลบ</th></tr></thead><tbody id="tbody"></tbody></table></div></div></section>
 <section id="setting" class="page">
-<div class="card"><h2>☁️ GitHub Sync — 0 บาท</h2>
+<div class="card"><h2>⚙️ การเชื่อมต่อระบบ</h2>
 <div class="notice">ใช้ GitHub เป็นฐานข้อมูลกลาง ไม่ใช้ Firebase / Supabase / Google Sheets<br>ข้อมูล QC และรูปจะถูกเข้ารหัสก่อนส่งขึ้น GitHub</div>
 <div class="notice" style="margin-top:10px">☁️ <b>Cloudinary:</b> <span id="cloudStatus">พร้อมใช้งาน</span><br><span class="muted">Cloud: ozv3rnvu • Upload preset: QPictureRecord (Unsigned)</span></div>
 <div class="notice" style="margin-top:10px">☁️ <b>พื้นที่ Repository:</b> <span id="storageText">กำลังตรวจสอบ...</span></div>
@@ -23,7 +23,7 @@
 <div class="full"><label>Sync Key (ต้องเหมือนกันทุกเครื่อง)</label><input id="ghKey" type="password" placeholder="ตั้งรหัสลับสำหรับเข้ารหัสข้อมูล"></div>
 </div>
 <div class="actions"><button class="btn blue" onclick="saveGHConfig()">💾 บันทึกการเชื่อมต่อ</button><button class="btn green" onclick="syncNow()">☁️ Sync Now</button><button class="btn blue" onclick="testCloudinary()">🧪 Test Cloudinary</button><button class="btn blue" onclick="pullNow()">📥 โหลดจาก GitHub</button><button class="btn gray" onclick="clearGHToken()">ล้าง Token เครื่องนี้</button></div>
-<p class="muted">สถานะ: <b id="ghStatus">ยังไม่ได้เชื่อมต่อ</b></p><p class="muted">☁️ พื้นที่ Repository: <b id="storageText">กำลังตรวจสอบ...</b></p>
+<p class="muted">สถานะ: <b id="ghStatus">ยังไม่ได้เชื่อมต่อ</b></p><p class="muted">☁️ พื้นที่ Repository: <b id="storageText">กำลังตรวจสอบ...</b></p><div class="notice" style="margin-top:10px">รายชื่อ Inspector และรหัสผ่าน Setting จะอ่านจากข้อมูลชุดเดียวบน GitHub และตรวจอัปเดตอัตโนมัติทุก 15 วินาทีขณะเปิดเว็บอยู่ ต้องตั้ง Sync Key ให้เหมือนกันทุกเครื่อง และใส่ GitHub Token ในเครื่องที่ต้องการแก้ไข/บันทึกข้อมูล</div>
 <div class="notice" style="margin-top:10px">⚠️ อย่าใส่ Token ลงในโค้ดหรือส่งให้ผู้อื่น • Token ถูกเก็บเฉพาะ Browser เครื่องนี้</div>
 </div>
 <div class="card"><h2>⚙️ Setting</h2><div class="notice">เฉพาะเจ้าหน้าที่</div><div id="retentionNotice" class="notice" style="margin-top:10px">กำลังตรวจสอบรอบลบข้อมูล...</div><div class="actions" style="margin-top:10px;flex-wrap:wrap"><button class="btn red" onclick="reviewRetention()">🗑️ ตรวจสอบ/ลบข้อมูลครบ 3 เดือน</button><button class="btn red" onclick="deleteAllPhotos()">🚨 ลบรูปทั้งหมด</button><button class="btn red" onclick="deleteAllHistory()">🧨 ลบข้อมูลทั้งหมดใน History</button></div><div class="muted" style="margin-top:8px">ปุ่ม “ลบรูปทั้งหมด” จะลบรูปออกจากทุก Record ส่วน “ลบข้อมูลทั้งหมดใน History” จะลบ Record ทั้งหมดและส่งคำสั่งลบรูปบน Cloudinary โดยเก็บ Setting/รายชื่อ Inspector ไว้ การลบไม่สามารถย้อนกลับได้</div><label style="margin-top:12px">ตั้งรหัสใหม่</label><input id="newpw" type="password" inputmode="numeric"><div class="actions"><button class="btn primary" onclick="setPw()">💾 บันทึกรหัส</button></div></div>
@@ -130,6 +130,8 @@ async function renderIns(){
 function renderSetting(){$('ilist').innerHTML=ins.map((x,i)=>`<div class="actions" style="margin-bottom:7px"><input id="ii${i}" value="${esc(x)}" style="flex:1"><button class="btn blue" onclick="renameI(${i})">✏️</button><button class="btn red" onclick="delI(${i})">🗑️</button></div>`).join('')}
 const normInspectorName=x=>String(x??'').trim().replace(/\s+/g,' ').toLowerCase();
 const cleanInspectorName=x=>String(x??'').trim().replace(/\s+/g,' ');
+// Names deliberately added again by the user can be restored from the deleted-name list.
+let restoreInspectorNames=new Set();
 async function persistIns(){
   ins=[...new Map((ins||[]).map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
   await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});
@@ -148,9 +150,10 @@ async function pushCloudInspector(){
   let remoteDeleted=Array.isArray(payload.deletedInspectors)?payload.deletedInspectors:[];
   let localActiveNorm=new Set(localActive.map(normInspectorName));
   let activeCandidates=[...new Map([...remoteIns,...localActive].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
-  let deleted=[...new Map([...remoteDeleted,...localDeleted].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
-  // ชื่อที่ Active ในเครื่องล่าสุดมีสิทธิ์เหนือสถานะ deleted จาก GitHub
-  deleted=deleted.filter(x=>!localActiveNorm.has(normInspectorName(x)));
+  // Explicitly re-added names remove their old deletion markers on every device.
+  let restoreNorm=new Set([...restoreInspectorNames].map(normInspectorName));
+  let deleted=[...new Map([...remoteDeleted,...localDeleted].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean).filter(x=>!restoreNorm.has(normInspectorName(x)));
+  // GitHub tombstone wins for stale devices, except when the user explicitly re-adds a name.
   let deletedNorm=new Set(deleted.map(normInspectorName));
   let active=activeCandidates.filter(x=>!deletedNorm.has(normInspectorName(x)));
   payload={...payload,inspectors:active,deletedInspectors:deleted,updatedAt:Date.now()};
@@ -158,6 +161,7 @@ async function pushCloudInspector(){
   ins=active;
   await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});
   await put(S,{key:'deletedInspectors',value:deleted,updatedAt:Date.now()});
+  for(const n of [...restoreInspectorNames])restoreInspectorNames.delete(n);
   ghStatus('บันทึก Inspector สำเร็จ');
 }
 async function addInspectorInline(){
@@ -168,6 +172,7 @@ async function addInspectorInline(){
   if((ins||[]).some(x=>normInspectorName(x)===key))return alert('มีชื่อ Inspector นี้อยู่แล้ว');
   let removed=await setting('deletedInspectors',[]);
   removed=(removed||[]).filter(x=>normInspectorName(x)!==key);
+  restoreInspectorNames.add(n);
   ins=[...(ins||[]),n];
   await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});
   await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});
@@ -185,6 +190,7 @@ async function addI(){
   if((ins||[]).some(x=>normInspectorName(x)===key))return alert('มีชื่อ Inspector นี้อยู่แล้ว');
   let removed=await setting('deletedInspectors',[]);
   removed=(removed||[]).filter(x=>normInspectorName(x)!==key);
+  restoreInspectorNames.add(n);
   ins=[...(ins||[]),n];
   await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});
   await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});
@@ -192,7 +198,7 @@ async function addI(){
   try{await pushCloudInspector();alert('เพิ่ม Inspector “'+n+'” เรียบร้อยแล้ว และ Sync แล้ว')}
   catch(e){alert('เพิ่ม Inspector ในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n\n'+e.message)}
 }
-async function renameI(i){let n=$('ii'+i).value.trim();if(!n)return;let old=ins[i];if(ins.some((x,j)=>j!==i&&x===n))return alert('มีชื่อนี้แล้ว');ins[i]=n;let removed=await setting('deletedInspectors',[]);removed=removed.filter(x=>String(x)!==String(n));if(old&&old!==n&&!removed.includes(old))removed.push(old);await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});await persistIns();alert('แก้ไข Inspector เรียบร้อย')}
+async function renameI(i){let n=$('ii'+i).value.trim();if(!n)return;let old=ins[i];if(ins.some((x,j)=>j!==i&&x===n))return alert('มีชื่อนี้แล้ว');ins[i]=n;let removed=await setting('deletedInspectors',[]);removed=removed.filter(x=>normInspectorName(x)!==normInspectorName(n));restoreInspectorNames.add(n);if(old&&old!==n&&!removed.some(x=>normInspectorName(x)===normInspectorName(old)))removed.push(old);await put(S,{key:'deletedInspectors',value:removed,updatedAt:Date.now()});await persistIns();alert('แก้ไข Inspector เรียบร้อย')}
 async function delI(i){
   let name=ins[i];
   if(name==null)return;
@@ -526,19 +532,24 @@ async function mergeRemote(remote){
   let localDeletedIns=await setting('deletedInspectors',[]);
   let remoteIns=Array.isArray(remote.inspectors)?remote.inspectors:[];
   let remoteDeletedIns=Array.isArray(remote.deletedInspectors)?remote.deletedInspectors:[];
-  let localActiveNorm=new Set((localIns||[]).map(normInspectorName));
-  let activeCandidates=[...new Map([...(remoteIns||[]),...(localIns||[])].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
-  let deletedIns=[...new Map([...(localDeletedIns||[]),...(remoteDeletedIns||[])].map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
-  // ถ้าเครื่องนี้เพิ่งเพิ่มชื่อกลับมา ให้ Active มีสิทธิ์เหนือ deleted จากเครื่องอื่น/GitHub
-  deletedIns=deletedIns.filter(x=>!localActiveNorm.has(normInspectorName(x)));
+  // Treat the shared GitHub settings as the source of truth on pull.
+  // Do not union stale per-device IndexedDB Inspector lists, or devices will diverge.
+  let deletedIns=[...new Map((remoteDeletedIns||[]).map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
+  let activeCandidates=[...new Map((remoteIns||[]).map(x=>[normInspectorName(x),cleanInspectorName(x)])).values()].filter(Boolean);
   let deletedNorm=new Set(deletedIns.map(normInspectorName));
   ins=activeCandidates.filter(x=>!deletedNorm.has(normInspectorName(x)));
   await put(S,{key:'inspectors',value:ins,updatedAt:Date.now()});
   await put(S,{key:'deletedInspectors',value:deletedIns,updatedAt:Date.now()});
-  let lpa=Number(await setting('passwordUpdatedAt',0)),rpa=Number(remote.passwordUpdatedAt||0);if(rpa>lpa)await put(S,{key:'password',value:remote.password,passwordUpdatedAt:rpa});
+  let lpa=Number(await setting('passwordUpdatedAt',0)),rpa=Number(remote.passwordUpdatedAt||0);
+  // GitHub is the shared source of truth for password changes. Prefer remote on a timestamp tie too.
+  if(remote.password!=null && String(remote.password)!=='' && (rpa>lpa || (rpa===lpa && rpa>0)))await put(S,{key:'password',value:String(remote.password),passwordUpdatedAt:rpa,updatedAt:rpa});
   renderIns();renderHistory();renderTable();renderSetting()
 }
-async function pullNow(){if(ghBusy||!gh.syncKey)return;if(!navigator.onLine){ghStatus('ออฟไลน์');return}ghBusy=true;try{ghStatus('กำลังโหลดจาก GitHub...');let remote=await rawGet();if(remote.data){await mergeRemote(remote.data);ghStatus('โหลดจาก GitHub สำเร็จ • '+new Date().toLocaleTimeString('th-TH'))}else ghStatus('ยังไม่มีข้อมูลบน GitHub')}catch(e){console.error(e);ghStatus('โหลดไม่สำเร็จ');throw e}finally{ghBusy=false}}
+async function pullNow(){if(ghBusy||!gh.syncKey)return;if(!navigator.onLine){ghStatus('ออฟไลน์');return}ghBusy=true;try{ghStatus('กำลังโหลดจาก GitHub...');
+  // Prefer the authenticated Contents API when this device has a token (also works for private repos).
+  // Use raw.githubusercontent.com only for read-only devices without a token on a public repository.
+  let remote=gh.token?await ghGet():await rawGet();
+  if(remote.data){await mergeRemote(remote.data);ghStatus('โหลดจาก GitHub สำเร็จ • '+new Date().toLocaleTimeString('th-TH'))}else ghStatus('ยังไม่มีข้อมูลบน GitHub')}catch(e){console.error(e);ghStatus('โหลดไม่สำเร็จ');throw e}finally{ghBusy=false}}
 async function syncNow(){if(ghBusy)return;if(!gh.token||!gh.syncKey){ghStatus('กรุณาใส่ Token และ Sync Key');return}if(!navigator.onLine){ghStatus('ออฟไลน์');return}ghBusy=true;try{ghStatus('กำลังตรวจรูปเก่า...');await migrateLocalImages();ghStatus('กำลังอ่าน GitHub...');let remote=await ghGet();if(remote.data)await mergeRemote(remote.data);let payload=await localPayload();ghStatus('กำลังบันทึก GitHub...');await ghPut(payload,ghSha);ghStatus('Sync สำเร็จ • '+new Date().toLocaleTimeString('th-TH'))}catch(e){console.error(e);ghStatus('Sync ไม่สำเร็จ');alert('GitHub / Cloudinary Sync ไม่สำเร็จ\n\n'+e.message)}finally{ghBusy=false}}
 async function pushCloud(){if(!gh.token||!gh.syncKey)throw new Error('ยังไม่ได้ตั้ง GitHub Token + Sync Key');if(!navigator.onLine)throw new Error('ไม่มีอินเทอร์เน็ต');await migrateLocalImages();let remote=await ghGet();if(remote.data)await mergeRemote(remote.data);await ghPut(await localPayload(),ghSha);ghStatus('บันทึก Cloud สำเร็จ')}
 loadGH();
