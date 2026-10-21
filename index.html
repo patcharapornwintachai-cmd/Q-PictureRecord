@@ -26,7 +26,7 @@
 <p class="muted">สถานะ: <b id="ghStatus">ยังไม่ได้เชื่อมต่อ</b></p><p class="muted">☁️ พื้นที่ Repository: <b id="storageText">กำลังตรวจสอบ...</b></p>
 <div class="notice" style="margin-top:10px">⚠️ อย่าใส่ Token ลงในโค้ดหรือส่งให้ผู้อื่น • Token ถูกเก็บเฉพาะ Browser เครื่องนี้</div>
 </div>
-<div class="card"><h2>⚙️ Setting</h2><div class="notice">เฉพาะเจ้าหน้าที่</div><div id="retentionNotice" class="notice" style="margin-top:10px">กำลังตรวจสอบรอบลบข้อมูล...</div><div class="actions" style="margin-top:10px"><button class="btn red" onclick="reviewRetention()">🗑️ ตรวจสอบ/ลบข้อมูลครบ 3 เดือน</button></div><label style="margin-top:12px">ตั้งรหัสใหม่</label><input id="newpw" type="password" inputmode="numeric"><div class="actions"><button class="btn primary" onclick="setPw()">💾 บันทึกรหัส</button></div></div>
+<div class="card"><h2>⚙️ Setting</h2><div class="notice">เฉพาะเจ้าหน้าที่</div><div id="retentionNotice" class="notice" style="margin-top:10px">กำลังตรวจสอบรอบลบข้อมูล...</div><div class="actions" style="margin-top:10px;flex-wrap:wrap"><button class="btn red" onclick="reviewRetention()">🗑️ ตรวจสอบ/ลบข้อมูลครบ 3 เดือน</button><button class="btn red" onclick="deleteAllPhotos()">🚨 ลบรูปทั้งหมด</button></div><div class="muted" style="margin-top:8px">ปุ่ม “ลบรูปทั้งหมด” จะลบรูปออกจากทุก Record และส่งคำสั่งลบรูปบน Cloudinary โดยยังเก็บข้อมูล Code / Batch / Inspector / วันที่ไว้ การลบไม่สามารถย้อนกลับได้</div><label style="margin-top:12px">ตั้งรหัสใหม่</label><input id="newpw" type="password" inputmode="numeric"><div class="actions"><button class="btn primary" onclick="setPw()">💾 บันทึกรหัส</button></div></div>
 <div class="card"><h2>👤 Inspector</h2><div class="actions" style="margin-bottom:10px"><input id="newInspectorName" placeholder="พิมพ์ชื่อ Inspector ใหม่" style="flex:1"><button class="btn green" type="button" onclick="addInspectorInline()">➕ เพิ่ม</button></div><div id="ilist"></div><div class="muted">แก้ไข/ลบเฉพาะรายการสำหรับข้อมูลใหม่ ไม่กระทบข้อมูลที่เคยบันทึก</div></div>
 </section>
 </main><div id="imageModal" class="modal" onclick="closeImage(event)"><div class="box" style="max-width:900px;text-align:center"><img id="bigImage" style="max-width:100%;max-height:75vh;object-fit:contain;border-radius:10px"></div></div><div id="modal" class="modal"><div class="box"><h3>🔐 ใส่รหัส</h3><input id="pw" type="password" inputmode="numeric"><div class="actions"><button class="btn primary" onclick="verify()">ยืนยัน</button><button class="btn gray" onclick="closeM()">ยกเลิก</button></div></div></div>
@@ -222,7 +222,35 @@ function nextRetentionRun(now){let y=now.getFullYear(),m=now.getMonth();let mont
 function retentionDue(r){let created=new Date(r.inspectionDateTime||r.updatedAt||0);if(!created.getTime())return null;let now=new Date(),cutoff=retentionCutoff(now);if(!cutoff||created>cutoff)return null;return retentionRunDate(now)}
 function retentionInfo(){let now=new Date(),run=retentionRunDate(now),due=run?recs.filter(r=>retentionDue(r)):[],next=nextRetentionRun(now);return {due,next,run}}
 function renderRetention(){let el=$('retentionNotice');if(!el)return;let {due,next,run}=retentionInfo();if(run&&due.length){el.innerHTML='🔴 <b>รอบลบข้อมูลประจำงวดวันนี้: '+due.length+' รายการ</b><br>รอบลบ: '+run.toLocaleDateString('th-TH')+'<br>ข้อมูลที่เข้าเกณฑ์คือข้อมูลที่มีอายุอย่างน้อย 3 เดือน ณ วันสิ้นรอบ';el.style.background='#fee2e2';el.style.color='#991b1b'}else if(run){el.innerHTML='🟡 <b>วันนี้เป็นรอบลบข้อมูล แต่ยังไม่มีรายการครบ 3 เดือน</b><br>รอบลบถัดไป: '+next.toLocaleDateString('th-TH');el.style.background='#fef3c7';el.style.color='#92400e'}else{el.innerHTML='🟢 <b>รอบลบถัดไป: '+next.toLocaleDateString('th-TH')+'</b><br>ระบบจะตรวจข้อมูลที่อายุครบอย่างน้อย 3 เดือนในวันสิ้นรอบ';el.style.background='#ecfdf5';el.style.color='#166534'}}
-async function reviewRetention(){let {due}=retentionInfo();if(!due.length)return alert('ตอนนี้ยังไม่มีข้อมูลที่ครบกำหนดลบ 3 เดือน');let list=due.slice(0,20).map(r=>`${r.code} / ${r.batch} / ${r.inspector} / ${new Date(r.inspectionDateTime||r.updatedAt).toLocaleDateString('th-TH')}`).join('\n');let more=due.length>20?'\n... และอีก '+(due.length-20)+' รายการ':'';if(!confirm('⚠️ พบข้อมูลครบกำหนดลบ 3 เดือน '+due.length+' รายการ\n\n'+list+more+'\n\nข้อมูลที่ลบจะไม่แสดงใน History อีก\n\nยืนยันลบข้อมูลที่ครบกำหนดทั้งหมดหรือไม่?'))return;let deletePics=due.flatMap(r=>(r.photos||[]).map(p=>p.public_id).filter(Boolean));try{let ids=due.map(r=>String(r.id));for(let r of due)await remove(R,r.id);recs=await all(R);let ds=await setting('deletedIds',[]);let existing=new Set((ds||[]).map(String));for(let id of ids)if(!existing.has(id)){ds.push(id);existing.add(id)}await put(S,{key:'deletedIds',value:ds,updatedAt:Date.now()});renderHistory();renderTable();renderRetention();try{await pushCloud();let qok=await syncCloudinaryDeletes(deletePics);alert(qok?'✅ ลบข้อมูลครบ 3 เดือนเรียบร้อย และส่งคำสั่งลบรูป Cloudinary แล้ว':'✅ ลบข้อมูลครบ 3 เดือนแล้ว แต่คิวลบรูป Cloudinary ยังไม่ถูกส่ง')}catch(e){alert('ลบข้อมูลในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n'+e.message)}}catch(e){alert('❌ ลบข้อมูลไม่สำเร็จ\n'+e.message)}}
+async function deleteAllPhotos(){
+  const withPhotos=recs.filter(r=>Array.isArray(r.photos)&&r.photos.length>0);
+  if(!withPhotos.length)return alert('ไม่พบรูปภาพในข้อมูลที่โหลดอยู่');
+  const allPhotos=withPhotos.flatMap(r=>r.photos||[]);
+  const publicIds=[...new Set(allPhotos.map(p=>p&&p.public_id).filter(Boolean).map(String))];
+  const missingIds=allPhotos.filter(p=>!p||!p.public_id).length;
+  const count=allPhotos.length;
+  if(!confirm('⚠️ ยืนยันลบรูปภาพทั้งหมดหรือไม่?\n\nพบ '+count+' รูป จาก '+withPhotos.length+' รายการ\n\nระบบจะลบรูปออกจากทุก Record และส่ง public_id ไปให้ Cloudinary ลบจริง\nข้อมูล Code / Batch / Inspector / วันที่ จะยังคงอยู่\n\nการลบรูปไม่สามารถย้อนกลับได้'))return;
+  if(!confirm('ยืนยันครั้งสุดท้าย: ต้องการลบรูปทั้ง '+count+' รูปใช่หรือไม่?'))return;
+  try{
+    const now=Date.now();
+    for(const r of withPhotos){r.photos=[];r.updatedAt=now;await put(R,r)}
+    recs=await all(R);renderHistory();renderTable();
+    try{
+      await pushCloud();
+      if(publicIds.length){
+        const qok=await syncCloudinaryDeletes(publicIds);
+        if(qok){
+          alert('✅ ลบรูปออกจากข้อมูล Q-Snap/GitHub แล้ว\n🖼️ ส่งรูป '+publicIds.length+' รูปเข้าคิวลบ Cloudinary แล้ว\nตรวจ GitHub → Actions เพื่อยืนยันว่าลบสำเร็จ'+(missingIds?'\n⚠️ อีก '+missingIds+' รูปไม่มี public_id จึงไม่สามารถสั่งลบจาก Cloudinary ได้':''));
+        }else{
+          alert('⚠️ ลบรูปออกจากข้อมูล Q-Snap/GitHub แล้ว แต่ส่งคิวลบ Cloudinary ไม่สำเร็จ\nกรุณาตรวจ GitHub Token และไฟล์คิว'+(missingIds?'\nอีก '+missingIds+' รูปไม่มี public_id จึงไม่สามารถสั่งลบจาก Cloudinary ได้':''));
+        }
+      }else{
+        alert('✅ ลบรูปออกจากข้อมูล Q-Snap/GitHub แล้ว\n⚠️ ไม่พบ public_id จึงไม่มีรูปที่ส่งเข้าคิวลบ Cloudinary');
+      }
+    }catch(e){alert('ลบรูปออกจากข้อมูลในเครื่องแล้ว แต่ Sync GitHub/คิวลบ Cloudinary ไม่สำเร็จ\n'+e.message+'\nกรุณาเชื่อมต่อ GitHub แล้วกด Sync Now และตรวจคิวลบรูป')}
+  }catch(e){alert('❌ ลบรูปไม่สำเร็จ\n'+e.message)}
+}
+async function reviewRetention(){let {due}=retentionInfo();if(!due.length)return alert('ตอนนี้ยังไม่มีข้อมูลที่ครบกำหนดลบ 3 เดือน');let list=due.slice(0,20).map(r=>`${r.code} / ${r.batch} / ${r.inspector} / ${new Date(r.inspectionDateTime||r.updatedAt).toLocaleDateString('th-TH')}`).join('\n');let more=due.length>20?'\n... และอีก '+(due.length-20)+' รายการ':'';if(!confirm('⚠️ พบข้อมูลครบกำหนดลบ 3 เดือน '+due.length+' รายการ\n\n'+list+more+'\n\nข้อมูลที่ลบจะไม่แสดงใน History อีก\n\nยืนยันลบข้อมูลที่ครบกำหนดทั้งหมดหรือไม่?'))return;let deletePics=due.flatMap(r=>(r.photos||[]).map(p=>p.public_id).filter(Boolean));try{let ids=due.map(r=>String(r.id));for(let r of due)await remove(R,r.id);recs=await all(R);let ds=await setting('deletedIds',[]);let existing=new Set((ds||[]).map(String));for(let id of ids)if(!existing.has(id)){ds.push(id);existing.add(id)}await put(S,{key:'deletedIds',value:ds,updatedAt:Date.now()});renderHistory();renderTable();renderRetention();try{await pushCloud();if(deletePics.length){let qok=await syncCloudinaryDeletes(deletePics);alert(qok?'✅ ลบข้อมูลครบ 3 เดือนจาก Q-Snap/GitHub แล้ว\n🖼️ ส่งรูป '+new Set(deletePics).size+' รูปเข้าคิวลบ Cloudinary แล้ว\nตรวจ GitHub → Actions เพื่อยืนยันผลการลบรูป':'⚠️ ลบข้อมูลครบ 3 เดือนจาก Q-Snap/GitHub แล้ว\nแต่ส่งคิวลบรูป Cloudinary ไม่สำเร็จ กรุณาตรวจ GitHub Token และไฟล์คิว')}else{alert('✅ ลบข้อมูลครบ 3 เดือนจาก Q-Snap/GitHub แล้ว\n⚠️ รายการที่ลบไม่มี public_id ของ Cloudinary จึงไม่มีรูปที่ส่งเข้าคิวลบ')} }catch(e){alert('ลบข้อมูลในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n'+e.message)}}catch(e){alert('❌ ลบข้อมูลไม่สำเร็จ\n'+e.message)}}
 async function exportExcel(){
   const btn=document.querySelector('#history button[onclick="exportExcel()"]');
   if(btn&&btn.disabled)return;
@@ -436,6 +464,7 @@ async function decryptCloud(text){if(!text||!text.trim())return null;let x;try{x
 async function ghGet(){if(!gh.token)throw new Error('ต้องใช้ Token สำหรับการเขียน GitHub');let r=await fetch(ghUrl()+'?ref='+encodeURIComponent(gh.branch)+'&t='+Date.now(),{headers:ghHeaders(),cache:'no-store'});if(r.status===404){ghSha=null;return {sha:null,data:null,empty:true}}if(!r.ok){let tx=await r.text();throw new Error('GitHub อ่านไฟล์ไม่ได้ ('+r.status+') '+tx.slice(0,180))}let j=await r.json();ghSha=j.sha;if(!j.content)return {sha:j.sha,data:null,empty:true};return {sha:j.sha,data:await decryptCloud(new TextDecoder().decode(b64ToBytes(j.content))),empty:false}}
 async function rawGet(){let r=await fetch(ghRawUrl()+'?t='+Date.now(),{cache:'no-store'});if(r.status===404)return {data:null,empty:true};if(!r.ok)throw new Error('GitHub โหลดข้อมูลไม่ได้ ('+r.status+')');return {data:await decryptCloud(await r.text()),empty:false}}
 async function ghPut(payload,sha){let text=await encryptCloud(payload),body={message:'Q-Snap sync',content:bytesToB64(new TextEncoder().encode(text)),branch:gh.branch};if(sha)body.sha=sha;let r=await fetch(ghUrl(),{method:'PUT',headers:ghHeaders(),body:JSON.stringify(body)});if(r.status===409){let latest=await ghGet();return ghPut(payload,latest.sha)}if(!r.ok){let tx=await r.text();throw new Error('GitHub บันทึกไม่ได้ ('+r.status+') '+tx.slice(0,180))}let j=await r.json();ghSha=j.content&&j.content.sha?j.content.sha:ghSha}
+// Cloudinary images are deleted by GitHub Actions after their public_id values are queued here.
 function cloudDeleteQueueUrl(){return 'https://api.github.com/repos/'+encodeURIComponent(gh.owner)+'/'+encodeURIComponent(gh.repo)+'/contents/data/cloudinary-delete-queue.json'}
 async function queueCloudinaryDeletes(publicIds){
   let ids=[...new Set((publicIds||[]).map(x=>String(x||'').trim()).filter(Boolean))];
