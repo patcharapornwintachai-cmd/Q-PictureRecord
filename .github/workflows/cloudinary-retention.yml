@@ -1,127 +1,105 @@
-name: Cloudinary 3-Month Retention
+name: Q-Snap Cloudinary Delete
 
 on:
-  schedule:
-    - cron: "30 17 * * *"
+  push:
+    branches: [main]
+    paths:
+      - 'data/cloudinary-delete-queue.json'
   workflow_dispatch:
 
-jobs:
-  retention:
-    runs-on: ubuntu-latest
+permissions:
+  contents: write
 
+concurrency:
+  group: qsnap-cloudinary-delete
+  cancel-in-progress: false
+
+jobs:
+  delete-cloudinary-assets:
+    runs-on: ubuntu-latest
     steps:
-      - name: Check retention
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate secrets and queue
         env:
-          CLOUDINARY_CLOUD_NAME: ozv3rnvu
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
+          CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
+        run: |
+          test -n "$CLOUDINARY_CLOUD_NAME" || (echo 'Missing secret: CLOUDINARY_CLOUD_NAME' && exit 1)
+          test -n "$CLOUDINARY_API_KEY" || (echo 'Missing secret: CLOUDINARY_API_KEY' && exit 1)
+          test -n "$CLOUDINARY_API_SECRET" || (echo 'Missing secret: CLOUDINARY_API_SECRET' && exit 1)
+          test -f data/cloudinary-delete-queue.json || (echo 'Queue file is missing; create data/cloudinary-delete-queue.json containing []' && exit 1)
+
+      - name: Delete queued Cloudinary images
+        env:
+          CLOUDINARY_CLOUD_NAME: ${{ secrets.CLOUDINARY_CLOUD_NAME }}
           CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
           python3 - <<'PY'
-          import os
-          import requests
-          import hashlib
-          import time
-          from datetime import datetime, timezone, timedelta
+          import json, os, time, hashlib, urllib.parse, urllib.request, urllib.error
+          from pathlib import Path
 
-          cloud = os.environ["CLOUDINARY_CLOUD_NAME"]
-          api_key = os.environ["CLOUDINARY_API_KEY"]
-          api_secret = os.environ["CLOUDINARY_API_SECRET"]
-
-          now = datetime.now(timezone.utc) + timedelta(hours=7)
-
-          print("Bangkok time:", now)
-
-          # Run deletion only on the last day of each month
-          tomorrow = now + timedelta(days=1)
-
-          if tomorrow.month == now.month:
-              print("Today is not the last day of the month.")
-              print("No deletion required.")
+          q = Path('data/cloudinary-delete-queue.json')
+          ids = json.loads(q.read_text(encoding='utf-8'))
+          if not isinstance(ids, list):
+              raise SystemExit('Queue JSON must be a list of Cloudinary public_id strings.')
+          ids = list(dict.fromkeys(str(x).strip() for x in ids if str(x).strip()))
+          if not ids:
+              print('Delete queue is empty; no Cloudinary assets were deleted.')
               raise SystemExit(0)
 
-          # Keep the latest 3 calendar months.
-          # Example: Aug 31 -> delete May.
-          year = now.year
-          month = now.month - 3
+          cloud = os.environ['CLOUDINARY_CLOUD_NAME']
+          key = os.environ['CLOUDINARY_API_KEY']
+          secret = os.environ['CLOUDINARY_API_SECRET']
+          failed = []
+          succeeded = 0
 
-          while month <= 0:
-              month += 12
-              year -= 1
+          for public_id in ids:
+              ts = int(time.time())
+              params = {'invalidate': 'true', 'public_id': public_id, 'timestamp': str(ts)}
+              to_sign = '&'.join(f'{k}={params[k]}' for k in sorted(params)) + secret
+              signature = hashlib.sha1(to_sign.encode('utf-8')).hexdigest()
+              form = {
+                  'public_id': public_id,
+                  'timestamp': str(ts),
+                  'api_key': key,
+                  'signature': signature,
+                  'invalidate': 'true',
+              }
+              url = f'https://api.cloudinary.com/v1_1/{cloud}/image/destroy'
+              req = urllib.request.Request(url, data=urllib.parse.urlencode(form).encode(), method='POST')
+              try:
+                  with urllib.request.urlopen(req, timeout=30) as response:
+                      payload = json.loads(response.read().decode('utf-8'))
+                  result = payload.get('result', '')
+                  print(f'{public_id}: {result}')
+                  if result in ('ok', 'not found'):
+                      succeeded += 1
+                  else:
+                      failed.append(public_id)
+              except Exception as exc:
+                  detail = ''
+                  if isinstance(exc, urllib.error.HTTPError):
+                      try: detail = exc.read().decode('utf-8')[:500]
+                      except Exception: pass
+                  print(f'FAILED {public_id}: {exc} {detail}')
+                  failed.append(public_id)
 
-          target_month = f"{year:04d}-{month:02d}"
-
-          print("Target month:", target_month)
-
-          timestamp = int(time.time())
-
-          expression = f"tags=QPictureRecord"
-
-          search_url = (
-              f"https://api.cloudinary.com/v1_1/{cloud}/resources/search"
-          )
-
-          payload = {
-              "expression": expression,
-              "max_results": 500
-          }
-
-          auth = (api_key, api_secret)
-
-          response = requests.post(
-              search_url,
-              json=payload,
-              auth=auth
-          )
-
-          response.raise_for_status()
-
-          data = response.json()
-
-          resources = data.get("resources", [])
-
-          print("Found tagged resources:", len(resources))
-
-          for item in resources:
-              created_at = item.get("created_at", "")
-              public_id = item.get("public_id")
-
-              if not created_at or not public_id:
-                  continue
-
-              created_month = created_at[:7]
-
-              if created_month == target_month:
-                  print("Deleting:", public_id)
-
-                  signature = hashlib.sha1(
-                      (
-                          f"public_id={public_id}"
-                          f"&timestamp={timestamp}"
-                          f"{api_secret}"
-                      ).encode()
-                  ).hexdigest()
-
-                  delete_url = (
-                      f"https://api.cloudinary.com/v1_1/"
-                      f"{cloud}/resources/image/upload"
-                  )
-
-                  delete_data = {
-                      "public_ids[]": public_id,
-                      "timestamp": timestamp,
-                      "api_key": api_key,
-                      "signature": signature
-                  }
-
-                  delete_response = requests.delete(
-                      delete_url,
-                      data=delete_data
-                  )
-
-                  print(
-                      delete_response.status_code,
-                      delete_response.text
-                  )
-
-          print("Retention check completed.")
+          q.write_text(json.dumps(failed, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+          print(f'Processed {len(ids)} queued item(s); accepted/deleted/not-found: {succeeded}; failed: {len(failed)}')
+          if failed:
+              raise SystemExit(f'{len(failed)} asset(s) failed; failed public_id values remain in queue for retry.')
           PY
+
+      - name: Commit queue result
+        if: always()
+        run: |
+          git config user.name 'Q-Snap Bot'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add data/cloudinary-delete-queue.json
+          git diff --cached --quiet && exit 0
+          git commit -m 'Q-Snap: update Cloudinary delete queue'
+          git push
