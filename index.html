@@ -47,11 +47,39 @@ async function files(fs){let left=6-imgs.length;if(fs.length>left)alert('เพ�
 camera.onchange=e=>{files(e.target.files);e.target.value=''};gallery.onchange=e=>{files(e.target.files);e.target.value=''};function renderPhotos(){$('pc').textContent=imgs.length+' / 6 รูป';$('preview').innerHTML=imgs.map((p,i)=>`<div class="photo"><img src="${p.data}"><button onclick="imgs.splice(${i},1);renderPhotos()">×</button></div>`).join('')}
 let saveInProgress=false;
 let lastSaveKey='';
+function normalizeBatch(value){return String(value??'').trim().replace(/\s+/g,'').toUpperCase()}
+async function findDuplicateBatches(batch){
+  const key=normalizeBatch(batch);
+  if(!key)return [];
+  // Always check the latest local History first.
+  let found=(recs||[]).filter(r=>normalizeBatch(r&&r.batch)===key);
+  // If GitHub sync is configured, pull the latest shared records before checking.
+  if(gh&&gh.token&&gh.syncKey&&navigator.onLine){
+    try{
+      const remote=await ghGet();
+      if(remote&&remote.data){
+        await mergeRemote(remote.data);
+        found=(recs||[]).filter(r=>normalizeBatch(r&&r.batch)===key);
+      }
+    }catch(err){
+      console.warn('Could not check Batch duplicates on GitHub',err);
+      if(!confirm('⚠️ ไม่สามารถตรวจสอบ Batch กับ GitHub ได้ในขณะนี้\n\nต้องการบันทึกต่อโดยตรวจเฉพาะ History ในเครื่องหรือไม่?'))return null;
+    }
+  }
+  return found;
+}
 async function save(){
   if(saveInProgress)return;
   let c=$('code').value.trim().toUpperCase(),b=$('batch').value.trim(),i=$('inspector').value;
   if(!c||!b||!i)return alert('⚠️ กรุณากรอกข้อมูลให้ครบก่อนบันทึก');
   if(!imgs.length)return alert('⚠️ กรุณาเพิ่มรูปอย่างน้อย 1 รูป');
+  const duplicateBatches=await findDuplicateBatches(b);
+  if(duplicateBatches===null)return;
+  if(duplicateBatches.length){
+    const examples=duplicateBatches.slice(0,5).map(r=>`• Code: ${r.code||'-'} | Batch: ${r.batch||'-'} | Inspector: ${r.inspector||'-'} | Date: ${r.inspectionDateTime?new Date(r.inspectionDateTime).toLocaleString('th-TH'):'-'}`).join('\n');
+    const more=duplicateBatches.length>5?`\n...และอีก ${duplicateBatches.length-5} รายการ`:'';
+    if(!confirm(`⚠️ พบ Batch No. ซ้ำ: ${b}\n\nพบใน History แล้ว ${duplicateBatches.length} รายการ\n${examples}${more}\n\nต้องการบันทึก Batch นี้ต่อหรือไม่?`))return;
+  }
   let photoSignature=imgs.map(p=>p.data||p.url||'').join('|');
   let saveKey=c+'|'+b+'|'+i+'|'+photoSignature;
   if(lastSaveKey===saveKey)return;
