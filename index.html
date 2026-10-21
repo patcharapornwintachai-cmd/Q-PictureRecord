@@ -26,7 +26,7 @@
 <p class="muted">สถานะ: <b id="ghStatus">ยังไม่ได้เชื่อมต่อ</b></p><p class="muted">☁️ พื้นที่ Repository: <b id="storageText">กำลังตรวจสอบ...</b></p>
 <div class="notice" style="margin-top:10px">⚠️ อย่าใส่ Token ลงในโค้ดหรือส่งให้ผู้อื่น • Token ถูกเก็บเฉพาะ Browser เครื่องนี้</div>
 </div>
-<div class="card"><h2>⚙️ Setting</h2><div class="notice">เฉพาะเจ้าหน้าที่</div><div id="retentionNotice" class="notice" style="margin-top:10px">กำลังตรวจสอบรอบลบข้อมูล...</div><div class="actions" style="margin-top:10px;flex-wrap:wrap"><button class="btn red" onclick="reviewRetention()">🗑️ ตรวจสอบ/ลบข้อมูลครบ 3 เดือน</button><button class="btn red" onclick="deleteAllPhotos()">🚨 ลบรูปทั้งหมด</button></div><div class="muted" style="margin-top:8px">ปุ่ม “ลบรูปทั้งหมด” จะลบรูปออกจากทุก Record และส่งคำสั่งลบรูปบน Cloudinary โดยยังเก็บข้อมูล Code / Batch / Inspector / วันที่ไว้ การลบไม่สามารถย้อนกลับได้</div><label style="margin-top:12px">ตั้งรหัสใหม่</label><input id="newpw" type="password" inputmode="numeric"><div class="actions"><button class="btn primary" onclick="setPw()">💾 บันทึกรหัส</button></div></div>
+<div class="card"><h2>⚙️ Setting</h2><div class="notice">เฉพาะเจ้าหน้าที่</div><div id="retentionNotice" class="notice" style="margin-top:10px">กำลังตรวจสอบรอบลบข้อมูล...</div><div class="actions" style="margin-top:10px;flex-wrap:wrap"><button class="btn red" onclick="reviewRetention()">🗑️ ตรวจสอบ/ลบข้อมูลครบ 3 เดือน</button><button class="btn red" onclick="deleteAllPhotos()">🚨 ลบรูปทั้งหมด</button><button class="btn red" onclick="deleteAllHistory()">🧨 ลบข้อมูลทั้งหมดใน History</button></div><div class="muted" style="margin-top:8px">ปุ่ม “ลบรูปทั้งหมด” จะลบรูปออกจากทุก Record ส่วน “ลบข้อมูลทั้งหมดใน History” จะลบ Record ทั้งหมดและส่งคำสั่งลบรูปบน Cloudinary โดยเก็บ Setting/รายชื่อ Inspector ไว้ การลบไม่สามารถย้อนกลับได้</div><label style="margin-top:12px">ตั้งรหัสใหม่</label><input id="newpw" type="password" inputmode="numeric"><div class="actions"><button class="btn primary" onclick="setPw()">💾 บันทึกรหัส</button></div></div>
 <div class="card"><h2>👤 Inspector</h2><div class="actions" style="margin-bottom:10px"><input id="newInspectorName" placeholder="พิมพ์ชื่อ Inspector ใหม่" style="flex:1"><button class="btn green" type="button" onclick="addInspectorInline()">➕ เพิ่ม</button></div><div id="ilist"></div><div class="muted">แก้ไข/ลบเฉพาะรายการสำหรับข้อมูลใหม่ ไม่กระทบข้อมูลที่เคยบันทึก</div></div>
 </section>
 </main><div id="imageModal" class="modal" onclick="closeImage(event)"><div class="box" style="max-width:900px;text-align:center"><img id="bigImage" style="max-width:100%;max-height:75vh;object-fit:contain;border-radius:10px"></div></div><div id="modal" class="modal"><div class="box"><h3>🔐 ใส่รหัส</h3><input id="pw" type="password" inputmode="numeric"><div class="actions"><button class="btn primary" onclick="verify()">ยืนยัน</button><button class="btn gray" onclick="closeM()">ยกเลิก</button></div></div></div>
@@ -249,6 +249,28 @@ async function deleteAllPhotos(){
       }
     }catch(e){alert('ลบรูปออกจากข้อมูลในเครื่องแล้ว แต่ Sync GitHub/คิวลบ Cloudinary ไม่สำเร็จ\n'+e.message+'\nกรุณาเชื่อมต่อ GitHub แล้วกด Sync Now และตรวจคิวลบรูป')}
   }catch(e){alert('❌ ลบรูปไม่สำเร็จ\n'+e.message)}
+}
+async function deleteAllHistory(){
+  const allRecords=[...recs];
+  if(!allRecords.length)return alert('ไม่มีข้อมูลใน History ให้ลบ');
+  const ids=allRecords.map(r=>String(r.id));
+  const publicIds=[...new Set(allRecords.flatMap(r=>(r.photos||[]).map(p=>p&&p.public_id).filter(Boolean).map(String)))];
+  if(!confirm('⚠️ ยืนยันลบข้อมูล History ทั้งหมดหรือไม่?\n\nจะลบ '+allRecords.length+' รายการ และส่งรูป '+publicIds.length+' รูปเข้าคิวลบ Cloudinary\n\nรายชื่อ Inspector และ Setting จะยังคงอยู่\nการลบไม่สามารถย้อนกลับได้'))return;
+  if(!confirm('ยืนยันครั้งสุดท้าย: ลบข้อมูล History ทั้ง '+allRecords.length+' รายการใช่หรือไม่?'))return;
+  try{
+    for(const r of allRecords) await remove(R,r.id);
+    const ds=await setting('deletedIds',[]); const existing=new Set((ds||[]).map(String));
+    for(const id of ids) if(!existing.has(id)){ds.push(id);existing.add(id)}
+    await put(S,{key:'deletedIds',value:ds,updatedAt:Date.now()});
+    recs=await all(R); renderHistory(); renderTable(); renderRetention();
+    try{
+      await pushCloud();
+      if(publicIds.length){
+        const qok=await syncCloudinaryDeletes(publicIds);
+        alert(qok?'✅ ลบข้อมูล History ทั้งหมดจากเครื่องและ Sync GitHub แล้ว\n🖼️ ส่งรูป '+publicIds.length+' รูปเข้าคิวลบ Cloudinary แล้ว\nตรวจ GitHub → Actions เพื่อยืนยันผล':'⚠️ ลบข้อมูล History จากเครื่องแล้ว แต่ส่งคิวลบรูป Cloudinary ไม่สำเร็จ กรุณาตรวจ GitHub Token และไฟล์คิว');
+      }else alert('✅ ลบข้อมูล History ทั้งหมดและ Sync GitHub แล้ว\nไม่พบ public_id ของรูปภาพ จึงไม่มีรูปที่ส่งเข้าคิวลบ Cloudinary');
+    }catch(e){alert('⚠️ ลบข้อมูลในเครื่องแล้ว แต่ Sync GitHub/คิวลบรูปไม่สำเร็จ\n'+e.message+'\nกรุณาตรวจการเชื่อมต่อ GitHub ก่อนถือว่าการลบเสร็จสมบูรณ์')}
+  }catch(e){alert('❌ ลบข้อมูล History ไม่สำเร็จ\n'+e.message)}
 }
 async function reviewRetention(){let {due}=retentionInfo();if(!due.length)return alert('ตอนนี้ยังไม่มีข้อมูลที่ครบกำหนดลบ 3 เดือน');let list=due.slice(0,20).map(r=>`${r.code} / ${r.batch} / ${r.inspector} / ${new Date(r.inspectionDateTime||r.updatedAt).toLocaleDateString('th-TH')}`).join('\n');let more=due.length>20?'\n... และอีก '+(due.length-20)+' รายการ':'';if(!confirm('⚠️ พบข้อมูลครบกำหนดลบ 3 เดือน '+due.length+' รายการ\n\n'+list+more+'\n\nข้อมูลที่ลบจะไม่แสดงใน History อีก\n\nยืนยันลบข้อมูลที่ครบกำหนดทั้งหมดหรือไม่?'))return;let deletePics=due.flatMap(r=>(r.photos||[]).map(p=>p.public_id).filter(Boolean));try{let ids=due.map(r=>String(r.id));for(let r of due)await remove(R,r.id);recs=await all(R);let ds=await setting('deletedIds',[]);let existing=new Set((ds||[]).map(String));for(let id of ids)if(!existing.has(id)){ds.push(id);existing.add(id)}await put(S,{key:'deletedIds',value:ds,updatedAt:Date.now()});renderHistory();renderTable();renderRetention();try{await pushCloud();if(deletePics.length){let qok=await syncCloudinaryDeletes(deletePics);alert(qok?'✅ ลบข้อมูลครบ 3 เดือนจาก Q-Snap/GitHub แล้ว\n🖼️ ส่งรูป '+new Set(deletePics).size+' รูปเข้าคิวลบ Cloudinary แล้ว\nตรวจ GitHub → Actions เพื่อยืนยันผลการลบรูป':'⚠️ ลบข้อมูลครบ 3 เดือนจาก Q-Snap/GitHub แล้ว\nแต่ส่งคิวลบรูป Cloudinary ไม่สำเร็จ กรุณาตรวจ GitHub Token และไฟล์คิว')}else{alert('✅ ลบข้อมูลครบ 3 เดือนจาก Q-Snap/GitHub แล้ว\n⚠️ รายการที่ลบไม่มี public_id ของ Cloudinary จึงไม่มีรูปที่ส่งเข้าคิวลบ')} }catch(e){alert('ลบข้อมูลในเครื่องแล้ว แต่ Sync GitHub ไม่สำเร็จ\n'+e.message)}}catch(e){alert('❌ ลบข้อมูลไม่สำเร็จ\n'+e.message)}}
 async function exportExcel(){
