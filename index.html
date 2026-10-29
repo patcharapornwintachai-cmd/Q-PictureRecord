@@ -51,22 +51,36 @@ function normalizeBatch(value){return String(value??'').trim().replace(/\s+/g,''
 async function findDuplicateBatches(batch){
   const key=normalizeBatch(batch);
   if(!key)return [];
-  // Always check the latest local History first.
-  let found=(recs||[]).filter(r=>normalizeBatch(r&&r.batch)===key);
-  // If GitHub sync is configured, pull the latest shared records before checking.
-  if(gh&&gh.token&&gh.syncKey&&navigator.onLine){
+  // When GitHub is available, use the current shared file as the duplicate-check
+  // source. Do NOT call mergeRemote() here: it unions stale local records into recs,
+  // which can produce a duplicate warning for a record absent from current History.
+  if(gh&&gh.syncKey&&navigator.onLine){
     try{
-      const remote=await ghGet();
+      let remote;
+      if(gh.token) remote=await ghGet();
+      else remote=await rawGet();
       if(remote&&remote.data){
-        await mergeRemote(remote.data);
-        found=(recs||[]).filter(r=>normalizeBatch(r&&r.batch)===key);
+        // A deletion may already be recorded locally but not yet reflected in the
+        // remote snapshot. Honor both local and GitHub tombstones before checking.
+        const localDeleted=await setting('deletedIds',[]);
+        const deletedIds=new Set([
+          ...(Array.isArray(localDeleted)?localDeleted:[]),
+          ...(Array.isArray(remote.data.deletedIds)?remote.data.deletedIds:[])
+        ].map(String));
+        return (Array.isArray(remote.data.records)?remote.data.records:[])
+          .filter(r=>r && !deletedIds.has(String(r.id)) && normalizeBatch(r.batch)===key);
       }
+      // A valid empty/missing shared file means there are no shared duplicates.
+      if(remote&&remote.empty)return [];
     }catch(err){
       console.warn('Could not check Batch duplicates on GitHub',err);
-      if(!confirm('⚠️ ไม่สามารถตรวจสอบ Batch กับ GitHub ได้ในขณะนี้\n\nต้องการบันทึกต่อโดยตรวจเฉพาะ History ในเครื่องหรือไม่?'))return null;
+      if(!confirm('⚠️ ไม่สามารถตรวจสอบ Batch กับ GitHub ได้ในขณะนี้\\n\\nต้องการตรวจสอบจาก History ในเครื่องและบันทึกต่อหรือไม่?'))return null;
     }
   }
-  return found;
+
+  // Offline or not configured: check only the currently loaded local History.
+  const deletedIds=new Set((await setting('deletedIds',[])).map(String));
+  return (recs||[]).filter(r=>r && !deletedIds.has(String(r.id)) && normalizeBatch(r.batch)===key);
 }
 async function save(){
   if(saveInProgress)return;
